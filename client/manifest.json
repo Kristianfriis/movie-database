@@ -1,7 +1,8 @@
 {
   "name": "My Movie Library",
   "short_name": "MovieLibrary",
-  "start_url": "/",
+  "start_url": "/movie-database/#/",
+"scope":"/movie-database/",
   "display": "standalone",
   "background_color": "#ffffff",
   "display_override": [ "window-controls-overlay", "standalone", "fullscreen" ],
