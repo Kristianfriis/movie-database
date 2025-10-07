@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>My Movie Library</title>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+    <link href="https://cdn.jsdelivr.net/npm/@ionic/vue@8.7.5/css/core.min.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@ionic/vue-router@8.7.5/dist/index.min.js"></script> -->
+</head>
+
+<body>
+    <div id="app">
+    </div>
+</body>
+<script type="importmap">
+{
+  "imports": {
+    "vue": "https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.41/vue.esm-browser.prod.js",
+    "vue-router": "https://cdnjs.cloudflare.com/ajax/libs/vue-router/4.1.5/vue-router.esm-browser.min.js",
+    "@vue/devtools-api": "https://unpkg.com/@vue/devtools-api@6.4.5/lib/esm/index.js",
+    "@ionic/ionicvue": "https://cdn.jsdelivr.net/npm/@ionic/vue@8.7.5/+esm",
+    "@ionic/core" : "https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/index.esm.js"
+  }
+}
+</script>
+<script type="module">
+    import { createApp } from 'vue'
+    import { IonicVue } from "@ionic/ionicvue"
+    import { createRouter, createWebHashHistory } from 'vue-router';
+    import { menuController } from "@ionic/core"
+    window.__VUE_PROD_DEVTOOLS__ = false; // 👈 Add this line
+
+    import { store } from './services/state.js'
+
+    import Search from './components/Search.js'
+    import Add from './components/Add.js'
+    import Details from './components/Details.js'
+
+    const routes = [
+        { path: '/', component: Search },
+        { path: '/add', component: Add },
+        { path: '/details/:id', component: Details }
+    ]
+
+    const router = createRouter({
+        history: createWebHashHistory(),
+        routes
+    })
+
+    const App = {
+        data() {
+            return {
+                store
+            }
+        },
+        methods: {
+            back() {
+                history.back();
+                this.store.showBackButton = false;
+            },
+            navigate(path) {
+                router.push(path);
+                menuController.close();
+            }
+        },
+        template:/*html*/`
+      <ion-app>
+          <!-- Side Menu -->
+          <ion-menu content-id="main-content" swipeGesture="true">
+            <ion-header>
+              <ion-toolbar>
+                <ion-title>Menu</ion-title>
+              </ion-toolbar>
+            </ion-header>
+            <ion-content class="ion-padding">
+              <ion-list>
+                <ion-item button @click="navigate('/')">Search</ion-item>
+                <ion-item button @click="navigate('/add')">Add Movie</ion-item>
+              </ion-list>
+            </ion-content>
+          </ion-menu>
+
+          <!-- Main Content -->
+          <div class="ion-page" id="main-content">
+            <ion-header>
+              <ion-toolbar>
+                <ion-buttons slot="start">
+                  <ion-menu-button></ion-menu-button>
+                </ion-buttons>
+                <ion-title>🎬 My Movie Library</ion-title>
+              </ion-toolbar>
+            </ion-header>
+
+            <ion-content>
+              <router-view></router-view>
+            </ion-content>
+   </div>
+        </ion-app>
+      `
+    }
+
+     createApp(App).use(IonicVue).use(router).mount('#app')
+
+    // if(store.showBackButton){
+    //     document.querySelector('ons-back-button').onClick = function (event) {
+    //     // Reset the whole stack instead of popping 1 page
+    //     history.back();
+    // };
+    // }
+  
+</script>
+
+</html>
