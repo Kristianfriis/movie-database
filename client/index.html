@@ -10,12 +10,19 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
     <link href="https://cdn.jsdelivr.net/npm/@ionic/vue@8.7.5/css/core.min.css" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 </head>
 
 <body>
     <div id="app">
     </div>
 </body>
+<script>
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark');
+  }
+</script>
 <script type="importmap">
 {
   "imports": {
