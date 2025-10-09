@@ -25,7 +25,7 @@ export default {
       }
     }
   },
-  template: `
+  template: /*html*/`
     <ion-page>
       <ion-content class="ion-padding">
         <ion-card>

@@ -43,6 +43,12 @@
       document.documentElement.classList.remove(darkModeClassName)
     }
   })
+
+  window.appConfig = {
+    apiUrl: location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+      ? 'https://localhost:7154'
+      : 'https://movie-database-internal-dmeph2fgdmhuf0b3.westeurope-01.azurewebsites.net'
+  }
 </script>
 <script type="importmap">
 {
@@ -63,6 +69,7 @@
   window.__VUE_PROD_DEVTOOLS__ = false; // 👈 Add this line
   import { router } from './router.js'
   import { supabase } from './services/supabase.js'
+  import { UserService } from './services/user-service.js'
 
   import { store } from './services/state.js'
 
@@ -85,6 +92,7 @@
         // this.store.user = null;
         // this.store.isAuthenticated = false;
         await supabase.auth.signOut()
+        await UserService.clearCache();
         router.push('/login');
         menuController.close();
       }
@@ -102,6 +110,7 @@
               <ion-list>
                 <ion-item button @click="navigate('/')">Search</ion-item>
                 <ion-item button @click="navigate('/add')">Add Movie</ion-item>
+                <ion-item button @click="navigate('/profile')">Profile</ion-item>
                 <ion-item button @click="logout">Logout</ion-item>
               </ion-list>
             </ion-content>

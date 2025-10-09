@@ -8,12 +8,15 @@ import Login from './components/auth/Login.js'
 import Signup from './components/auth/Signup.js'
 import ResetPassword from './components/auth/ResetPassword.js'
 import Confirm from './components/auth/Confirm.js'
+import Profile from './components/auth/Profile.js'
 
 const routes = [
   { path: '/login', component: Login },
   { path: '/signup', component: Signup },
   { path: '/reset', component: ResetPassword },
   { path: '/confirm', component: Confirm },
+  { path: '/profile', component: Profile },
+  { path: '/profile/:email', component: Profile },
   { path: '/', component: Search },
   { path: '/add', component: Add },
   { path: '/details/:id', component: Details },

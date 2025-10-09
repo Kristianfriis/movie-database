@@ -1,4 +1,6 @@
 import { supabase } from '../../services/supabase.js'
+import { UserService } from '../../services/user-service.js'
+import { loadingController } from '@ionic/core';
 
 export default {
   name: 'Login',
@@ -11,6 +13,12 @@ export default {
   },
   methods: {
     async login() {
+      const loading = await loadingController.create({
+        message: 'Logging in...',
+      });
+
+      loading.present();
+
       const { error } = await supabase.auth.signInWithPassword({
         email: this.email,
         password: this.password
@@ -18,11 +26,18 @@ export default {
       if (error) {
         this.error = error.message
       } else {
-        this.$router.push('/')
+        const user = await UserService.getUser();
+        if (user === null) {
+          this.$router.push('/profile' + (this.email ? '/' + this.email : ''));
+        } else {
+          this.$router.push('/')
+        }
       }
+
+      loading.dismiss();
     }
   },
-  template: `
+  template: /*html*/`
   <ion-page>
   <ion-content class="ion-padding">
     <ion-card>

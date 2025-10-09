@@ -1,12 +1,4 @@
-import { supabase } from './supabase.js'
-
-async function authHeaders() {
-  const { data: { session } } = await supabase.auth.getSession()
-
-  const token = session?.access_token
-
-  return token ? { Authorization: `Bearer ${token}` } : {}
-}
+import { authHeaders } from './auth-helper.js'
 
 export const MovieService = {
   movies: [
@@ -15,7 +7,7 @@ export const MovieService = {
     { id: 3, title: "Interstellar", format: "Blu-ray", year: 2014 }
   ],
 
-  getAll() {
+  async getAll() {
     return Promise.resolve(this.movies)
   },
 
