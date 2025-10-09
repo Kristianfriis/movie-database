@@ -72,5 +72,7 @@ public static class AuthEndpoints
 
             return Results.Ok(updatedUser);
         }).RequireAuthorization();
+
+        // Test
     }
 }
