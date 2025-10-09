@@ -66,23 +66,6 @@
 
   import { store } from './services/state.js'
 
-  import Search from './components/Search.js'
-  import Add from './components/Add.js'
-  import Details from './components/Details.js'
-  import Login from './components/Login.js'
-
-  // const routes = [
-  //   { path: '/', component: Search },
-  //   { path: '/add', component: Add },
-  //   { path: '/details/:id', component: Details },
-  //   { path: '/login', component: Login }
-  // ]
-
-  // const router = createRouter({
-  //   history: createWebHashHistory(),
-  //   routes
-  // })
-
   const App = {
     data() {
       return {
@@ -136,14 +119,6 @@
   }
 
   createApp(App).use(IonicVue).use(router).mount('#app')
-
-  // if(store.showBackButton){
-  //     document.querySelector('ons-back-button').onClick = function (event) {
-  //     // Reset the whole stack instead of popping 1 page
-  //     history.back();
-  // };
-  // }
-
 </script>
 
 </html>
