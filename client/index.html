@@ -2,45 +2,43 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="rgba(89,74,226,1)" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#27272f" media="(prefers-color-scheme: dark)" />
-    <title>My Movie Library</title>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
-    <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/palettes/dark.class.css" />
-    <link href="https://cdn.jsdelivr.net/npm/@ionic/vue@8.7.5/css/core.min.css" rel="stylesheet">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icons/favicon.ico" sizes="any">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>My Movie Library</title>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/palettes/dark.class.css" />
+  <link href="https://cdn.jsdelivr.net/npm/@ionic/vue@8.7.5/css/core.min.css" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 </head>
 
 <body>
-    <div id="app">
-    </div>
+  <div id="app">
+  </div>
 </body>
 <script>
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 
-    var darkModeClassName = 'ion-palette-dark'
+  var darkModeClassName = 'ion-palette-dark'
 
-    // Initial check
-    if (mediaQuery.matches) {
-        document.documentElement.classList.add(darkModeClassName)
+  // Initial check
+  if (mediaQuery.matches) {
+    document.documentElement.classList.add(darkModeClassName)
+  } else {
+    document.documentElement.classList.remove(darkModeClassName)
+  }
+
+  // Listen for changes
+  mediaQuery.addEventListener('change', (e) => {
+    if (e.matches) {
+      document.documentElement.classList.add(darkModeClassName)
     } else {
-        document.documentElement.classList.remove(darkModeClassName)
+      document.documentElement.classList.remove(darkModeClassName)
     }
-
-    // Listen for changes
-    mediaQuery.addEventListener('change', (e) => {
-        if (e.matches) {
-            document.documentElement.classList.add(darkModeClassName)
-        } else {
-            document.documentElement.classList.remove(darkModeClassName)
-        }
-    })
+  })
 </script>
 <script type="importmap">
 {
@@ -54,46 +52,54 @@
 }
 </script>
 <script type="module">
-    import { createApp } from 'vue'
-    import { IonicVue } from "@ionic/ionicvue"
-    import { createRouter, createWebHashHistory } from 'vue-router';
-    import { menuController } from "@ionic/core"
-    window.__VUE_PROD_DEVTOOLS__ = false; // 👈 Add this line
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    import { store } from './services/state.js'
+  const supabase = createClient('https://your-project.supabase.co', 'public-anon-key')
+</script>
+<script type="module">
+  import { createApp } from 'vue'
+  import { IonicVue } from "@ionic/ionicvue"
+  import { createRouter, createWebHashHistory } from 'vue-router';
+  import { menuController } from "@ionic/core"
+  window.__VUE_PROD_DEVTOOLS__ = false; // 👈 Add this line
+  import { router } from './router.js'
 
-    import Search from './components/Search.js'
-    import Add from './components/Add.js'
-    import Details from './components/Details.js'
+  import { store } from './services/state.js'
 
-    const routes = [
-        { path: '/', component: Search },
-        { path: '/add', component: Add },
-        { path: '/details/:id', component: Details }
-    ]
+  import Search from './components/Search.js'
+  import Add from './components/Add.js'
+  import Details from './components/Details.js'
+  import Login from './components/Login.js'
 
-    const router = createRouter({
-        history: createWebHashHistory(),
-        routes
-    })
+  // const routes = [
+  //   { path: '/', component: Search },
+  //   { path: '/add', component: Add },
+  //   { path: '/details/:id', component: Details },
+  //   { path: '/login', component: Login }
+  // ]
 
-    const App = {
-        data() {
-            return {
-                store
-            }
-        },
-        methods: {
-            back() {
-                history.back();
-                this.store.showBackButton = false;
-            },
-            navigate(path) {
-                router.push(path);
-                menuController.close();
-            }
-        },
-        template:/*html*/`
+  // const router = createRouter({
+  //   history: createWebHashHistory(),
+  //   routes
+  // })
+
+  const App = {
+    data() {
+      return {
+        store
+      }
+    },
+    methods: {
+      back() {
+        history.back();
+        this.store.showBackButton = false;
+      },
+      navigate(path) {
+        router.push(path);
+        menuController.close();
+      }
+    },
+    template:/*html*/`
       <ion-app>
           <!-- Side Menu -->
           <ion-menu content-id="main-content" swipeGesture="true">
@@ -127,16 +133,16 @@
    </div>
         </ion-app>
       `
-    }
+  }
 
-    createApp(App).use(IonicVue).use(router).mount('#app')
+  createApp(App).use(IonicVue).use(router).mount('#app')
 
-    // if(store.showBackButton){
-    //     document.querySelector('ons-back-button').onClick = function (event) {
-    //     // Reset the whole stack instead of popping 1 page
-    //     history.back();
-    // };
-    // }
+  // if(store.showBackButton){
+  //     document.querySelector('ons-back-button').onClick = function (event) {
+  //     // Reset the whole stack instead of popping 1 page
+  //     history.back();
+  // };
+  // }
 
 </script>
 

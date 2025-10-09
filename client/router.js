@@ -1,37 +1,30 @@
-import { MovieService } from './services/movie-service.js';
+import { createRouter, createWebHashHistory } from 'vue-router';
 
-document.addEventListener('alpine:init', () => {
-  Alpine.data('searchApp', () => ({
-    query: '',
-    results: [],
-    init() {
-      MovieService.getAll().then(m => this.results = m);
-    },
-    search() {
-      MovieService.search(this.query).then(m => this.results = m);
-    }
-  }));
+import Search from './components/Search.js'
+import Add from './components/Add.js'
+import Details from './components/Details.js'
+import Login from './components/Login.js'
 
-  Alpine.data('addApp', () => ({
-    title: '',
-    year: '',
-    format: 'DVD',
-    addMovie() {
-      MovieService.add({
-        title: this.title,
-        year: parseInt(this.year),
-        format: this.format
-      }).then(() => $router.navigate('/'));
-    }
-  }));
+const routes = [
+  { path: '/', component: Search },
+  { path: '/add', component: Add },
+  { path: '/details/:id', component: Details },
+  { path: '/login', component: Login }
+]
 
-  Alpine.data('detailsApp', () => ({
-    movie: null,
-    init() {
-      const id = $params.id;
-      MovieService.getAll().then(movies => {
-        this.movie = movies.find(m => m.id == id);
-      });
-    }
-  }));
-});
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes
+})
+
+// router.beforeEach(async (to, from, next) => {
+//   const { data: { user } } = await supabase.auth.getUser()
+
+//   if (to.path !== '/login' && !user) {
+//     next('/login')
+//   } else {
+//     next()
+//   }
+// })
+
+export { router }
