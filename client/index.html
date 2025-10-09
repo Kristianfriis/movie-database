@@ -52,17 +52,13 @@
 }
 </script>
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-  const supabase = createClient('https://your-project.supabase.co', 'public-anon-key')
-</script>
-<script type="module">
   import { createApp } from 'vue'
   import { IonicVue } from "@ionic/ionicvue"
   import { createRouter, createWebHashHistory } from 'vue-router';
   import { menuController } from "@ionic/core"
   window.__VUE_PROD_DEVTOOLS__ = false; // 👈 Add this line
   import { router } from './router.js'
+  import { supabase } from './services/supabase.js'
 
   import { store } from './services/state.js'
 
@@ -80,6 +76,13 @@
       navigate(path) {
         router.push(path);
         menuController.close();
+      },
+      async logout() {
+        // this.store.user = null;
+        // this.store.isAuthenticated = false;
+        await supabase.auth.signOut()
+        router.push('/login');
+        menuController.close();
       }
     },
     template:/*html*/`
@@ -95,6 +98,7 @@
               <ion-list>
                 <ion-item button @click="navigate('/')">Search</ion-item>
                 <ion-item button @click="navigate('/add')">Add Movie</ion-item>
+                <ion-item button @click="logout">Logout</ion-item>
               </ion-list>
             </ion-content>
           </ion-menu>

@@ -1,3 +1,5 @@
+import { supabase } from '../services/supabase.js'
+
 export default {
   name: 'Login',
   data() {
@@ -21,20 +23,34 @@ export default {
     }
   },
   template: `
-    <ion-page>
-      <ion-content class="ion-padding">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Login</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-input label="Email" v-model="email" type="email" />
-            <ion-input label="Password" v-model="password" type="password" />
-            <ion-button expand="block" @click="login">Login</ion-button>
-            <ion-text color="danger" v-if="error">{{ error }}</ion-text>
-          </ion-card-content>
-        </ion-card>
-      </ion-content>
-    </ion-page>
+  <ion-page>
+  <ion-content class="ion-padding">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Login</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-input label="Email" v-model="email" type="email" />
+        <ion-input label="Password" v-model="password" type="password" />
+        <ion-button expand="block" @click="login">Login</ion-button>
+
+        <ion-text color="danger" v-if="error">{{ error }}</ion-text>
+
+        <div class="ion-margin-top">
+          <ion-text>
+            Don't have an account?
+            <a href="#/signup">Sign up</a>
+          </ion-text>
+          <br />
+          <ion-text>
+            Forgot your password?
+            <a href="#/reset">Reset it</a>
+          </ion-text>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </ion-content>
+</ion-page>
+
   `
 }
