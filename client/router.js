@@ -4,10 +4,10 @@ import { supabase } from './services/supabase.js'
 import Search from './components/Search.js'
 import Add from './components/Add.js'
 import Details from './components/Details.js'
-import Login from './components/Login.js'
-import Signup from './components/Signup.js'
-import ResetPassword from './components/ResetPassword.js'
-import Confirm from './components/Confirm.js'
+import Login from './components/auth/Login.js'
+import Signup from './components/auth/Signup.js'
+import ResetPassword from './components/auth/ResetPassword.js'
+import Confirm from './components/auth/Confirm.js'
 
 const routes = [
   { path: '/login', component: Login },
