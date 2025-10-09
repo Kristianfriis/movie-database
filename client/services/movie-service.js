@@ -1,3 +1,13 @@
+import { supabase } from './supabase.js'
+
+async function authHeaders() {
+  const { data: { session } } = await supabase.auth.getSession()
+
+  const token = session?.access_token
+
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 export const MovieService = {
   movies: [
     { id: 1, title: "The Matrix", format: "Blu-ray", year: 1999 },
