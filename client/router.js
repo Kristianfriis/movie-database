@@ -9,6 +9,7 @@ import Signup from './components/auth/Signup.js'
 import ResetPassword from './components/auth/ResetPassword.js'
 import Confirm from './components/auth/Confirm.js'
 import Profile from './components/auth/Profile.js'
+import AllCollectionsPage from './components/collections/AllCollectionsPage.js';
 
 const routes = [
   { path: '/login', component: Login },
@@ -17,9 +18,10 @@ const routes = [
   { path: '/confirm', component: Confirm },
   { path: '/profile', component: Profile },
   { path: '/profile/:email', component: Profile },
-  { path: '/', component: Search },
+  { path: '/search', component: Search },
   { path: '/add', component: Add },
   { path: '/details/:id', component: Details },
+  { path: '/', component: AllCollectionsPage },
 ]
 
 const router = createRouter({

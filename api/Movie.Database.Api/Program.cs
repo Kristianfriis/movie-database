@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Movie.Database.Api.Extentions;
 using Movie.Database.Api.Models;
 using Movie.Database.Api.Endpoints;
+using Movie.Database.Api.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +57,7 @@ builder.Services.AddScoped<Client>(sp =>
 });
 
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<IMovieRepository, SupabaseMovieRepository>();
 
 var app = builder.Build();
 
@@ -68,5 +70,6 @@ app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
 app.MapAuthEndpoints();
+app.MapMovieEndpoints();
 
 app.Run();
