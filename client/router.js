@@ -10,6 +10,7 @@ import ResetPassword from './components/auth/ResetPassword.js'
 import Confirm from './components/auth/Confirm.js'
 import Profile from './components/auth/Profile.js'
 import AllCollectionsPage from './components/collections/AllCollectionsPage.js';
+import AddUserToCollection from './components/collections/AddUserToCollection.js';
 
 const routes = [
   { path: '/login', component: Login },
@@ -22,6 +23,7 @@ const routes = [
   { path: '/add', component: Add },
   { path: '/details/:id', component: Details },
   { path: '/', component: AllCollectionsPage },
+  { path: '/add-user-to-collection/:collectionId', component: AddUserToCollection },
 ]
 
 const router = createRouter({

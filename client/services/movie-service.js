@@ -89,12 +89,12 @@ export const MovieService = {
     return responseJson.id;
   },
 
- /**
-   * Search movies in the current collection (or across all if no collectionId provided).
-   * @param {string} query
-   * @param {string} [collectionId]
-   * @returns {Promise<Movie[]>}
-   */
+  /**
+    * Search movies in the current collection (or across all if no collectionId provided).
+    * @param {string} query
+    * @param {string} [collectionId]
+    * @returns {Promise<Movie[]>}
+    */
   async search(query, collectionId) {
     const q = (query || '').toLowerCase();
 
@@ -220,6 +220,30 @@ export const MovieService = {
       this.currentCollectionId = null;
       this.movies = [];
     }
+  },
+
+  async generateInviteLink(collectionId) {
+    // return window.appConfig.clientUrl + '/confirm?collectionId=' + collectionId;
+    if (!collectionId) {
+      return null;
+    }
+
+    var response = await fetch(window.appConfig.apiUrl + '/collections/'  + collectionId + '/invite', {
+      method: 'POST',
+      headers: {
+         ...await authHeaders(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    })
+
+    if (!response.ok) {
+      return null;
+    }
+
+    var responseJson = await response.json();
+    
+    return responseJson;
   },
 
   getUserId() {

@@ -1,9 +1,11 @@
 using System;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Movie.Database.Api.Dtos;
 using Movie.Database.Api.Extentions;
 using Movie.Database.Api.Interfaces;
 using Movie.Database.Api.Models;
+using Movie.Database.Api.Persistence;
 
 namespace Movie.Database.Api.Endpoints;
 
@@ -23,28 +25,36 @@ public static class MovieEndpoints
         {
             var movie = await repo.GetByIdAsync(id);
             return movie is null ? Results.NotFound() : Results.Ok(movie);
-        });
+        }).Produces<MovieModel>(StatusCodes.Status200OK);
 
         collections.MapGet("/{userId:guid}", async (Guid userId, IMovieRepository repo) =>
         {
             var collections = await repo.GetAvailableCollectionsAsync(userId);
 
             return Results.Ok(collections);
-        });
+        }).Produces<List<AvailableCollection>>();;
 
         collections.MapGet("/{collectionId:guid}/movies", async (Guid collectionId, IMovieRepository repo) =>
         {
             var movies = await repo.GetByCollectionAsync(collectionId);
 
             return Results.Ok(movies);
-        });
+        }).Produces<List<MovieModel>>();;
 
-        collections.MapPost("/{collectionId:guid}/movies", async (Guid collectionId, MovieModel movie, IMovieRepository repo) =>
+        collections.MapPost("/{collectionId:guid}/movies", async (Guid collectionId, CreateMovieRequest movie, IMovieRepository repo) =>
         {
-            await repo.AddToCollectionAsync(collectionId, movie);
+            var movieModel = new MovieModel
+            {
+                Title = movie.Title,
+                Format = (MovieFormat)movie.Format
+            };
 
-            return Results.Created($"/movies/{movie.Id}", movie);
-        });
+            var id = await repo.AddToCollectionAsync(collectionId, movieModel);
+
+            movieModel.Id = id;
+
+            return Results.Created($"/movies/{movieModel.Id}", movieModel);
+        }).Produces<MovieModel>(StatusCodes.Status201Created);
 
         collections.MapDelete("/{collectionId:guid}/movies/{movieId:guid}", async (Guid collectionId, Guid movieId, IMovieRepository repo) =>
         {
@@ -56,8 +66,38 @@ public static class MovieEndpoints
         collections.MapPost("/", async (CreateCollectionRequest request, IMovieRepository repo) =>
         {
             var id = await repo.CreateCollectionAsync(request.Name, request.OwnerId);
-            
+
             return Results.Created($"/collections/{id}", new { id });
+        });
+
+        collections.MapPost("/{collectionId:guid}/invite", async (Guid collectionId, ClaimsPrincipal user, IConfiguration config, ICollectionService collectionService, UserRepository userRepo) =>
+        {
+            var metaData = user.GetUserId();
+
+            if (metaData is null)
+                return Results.Unauthorized();
+
+            var existingUser = await userRepo.GetUserByAuthId(metaData.sub);
+            if (existingUser is null)
+                return Results.NotFound("User not found");
+
+
+            var (key, error) = await collectionService.GenerateInviteAsync(collectionId, Guid.Parse(existingUser.Id));
+
+            if (error is not null)
+                return Results.BadRequest(error);
+            
+            return Results.Ok(new { key });
+        }).Produces<string>();
+
+        collections.MapPost("/join", async ([FromBody] JoinCollectionRequest request, [FromServices] IConfiguration config, [FromServices] ICollectionService collectionService) =>
+        {
+            var (success, error) = await collectionService.JoinCollectionAsync(request.Token, request.UserId);
+
+            if (!success)
+                return Results.BadRequest(error);
+
+            return Results.Ok();
         });
     }
 }

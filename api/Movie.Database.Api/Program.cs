@@ -10,6 +10,7 @@ using Movie.Database.Api.Extentions;
 using Movie.Database.Api.Models;
 using Movie.Database.Api.Endpoints;
 using Movie.Database.Api.Interfaces;
+using Movie.Database.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,7 @@ builder.Services.AddScoped<Client>(sp =>
 
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<IMovieRepository, SupabaseMovieRepository>();
+builder.Services.AddScoped<ICollectionService, CollectionService>();
 
 var app = builder.Build();
 

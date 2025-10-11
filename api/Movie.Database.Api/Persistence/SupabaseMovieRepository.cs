@@ -44,7 +44,7 @@ public class SupabaseMovieRepository : IMovieRepository
         return movies.Models.Select(MapToDomain).ToList();
     }
 
-    public async Task AddToCollectionAsync(Guid collectionId, MovieModel movie)
+    public async Task<Guid> AddToCollectionAsync(Guid collectionId, MovieModel movie)
     {
         var dbMovie = new MovieEntity
         {
@@ -65,6 +65,8 @@ public class SupabaseMovieRepository : IMovieRepository
         };
 
         await _client.From<CollectionMovieEntity>().Insert(link);
+
+        return inserted.Model.Id;
     }
 
     public async Task RemoveFromCollectionAsync(Guid collectionId, Guid movieId)
@@ -191,5 +193,26 @@ public class SupabaseMovieRepository : IMovieRepository
     public Task RemoveMemberAsync(Guid collectionId, Guid userId)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<bool> IsMaintainerAsync(Guid collectionId, Guid userId)
+    {
+        var roles = await _client
+           .From<UserCollectionRoleEntity>()
+           .Where(r => r.CollectionId == collectionId && r.UserId == userId)
+           .Get();
+
+        var role = roles.Models.FirstOrDefault();
+
+        if (role is null) return false;
+
+        if (role.Role is null) return false;
+
+        if(role.Role.Equals(CollectionRole.Maintainer.ToString().ToLower(), StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return false;
     }
 }

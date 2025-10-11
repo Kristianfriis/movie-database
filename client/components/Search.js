@@ -1,13 +1,26 @@
 import { MovieService } from '../services/movie-service.js'
-import { loadingController } from '@ionic/core';
+import { loadingController, toastController } from '@ionic/core';
+import { IonSelect, IonSelectOption } from '@ionic/ionicvue';
 
 export default {
   template: /*html*/`
   <ion-page>
-      <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-      <ion-fab-button @click="openModal">
-        <ion-icon icon="add-outline"></ion-icon>
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+   <ion-fab-button>
+      <ion-icon name="chevron-up-circle"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button color="primary" @click="openModal">
+        <ion-icon name="add-outline" ></ion-icon>
+        <ion-icon name="film"></ion-icon>
       </ion-fab-button>
+      <ion-fab-button color="primary" @click="navigateToAddUser">
+        <ion-icon name="person-add"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button color="primary">
+        <ion-icon name="settings"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
     </ion-fab>
 
       <ion-list>
@@ -37,9 +50,10 @@ export default {
               <ion-input v-model="movie.title" placeholder="Title"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-select v-model="movie.format" placeholder="Format">
+              <ion-select v-model="movie.format" placeholder="Format" ref="select">
                 <ion-select-option value="DVD">DVD</ion-select-option>
-                <ion-select-option value="Blu-ray">Blu-ray</ion-select-option>
+                <ion-select-option value="BluRay">BluRay</ion-select-option>
+                <ion-select-option value="Digital">Digital</ion-select-option>
               </ion-select>
             </ion-item>
       </ion-list>
@@ -50,8 +64,9 @@ export default {
       </ion-modal>
 </ion-page>
   `,
+  components: { IonSelect, IonSelectOption },
   data() {
-    return { query: '', results: [], movie: { title: '', year: '', format: 'DVD' }, collectionId: null, showModal: false, }
+    return { query: '', results: [], movie: { title: '', year: '', format: 'DVD' }, collectionId: null, showModal: false }
   },
   async created() {
     const loading = await loadingController.create({
@@ -69,6 +84,11 @@ export default {
 
     loading.dismiss();
   },
+  mounted() {
+    this.$refs.select.addEventListener('ionChange', (e) => {
+      this.movie.format = e.detail.value;
+    });
+  },
   methods: {
     openModal() {
       this.showModal = true;
@@ -79,17 +99,27 @@ export default {
     search() {
       MovieService.search(this.query).then(m => this.results = m)
     },
+    navigateToAddUser() {
+      this.$router.push(`/add-user-to-collection/${this.collectionId}`);
+    },
     async addMovie() {
+      if (!this.movie.title || !this.movie.format) {
+        const toast = await toastController.create({
+          message: 'Either title or format is missing.',
+          duration: 1500,
+          swipeGesture: "vertical",
+          color: "danger"
+        });
+
+        await toast.present();
+        return;
+      }
+
       const loading = await loadingController.create({
-        message: `Adding movie...`,
+        message: `Adding movie ${this.movie.title}...`,
       });
 
       loading.present();
-
-      if (!this.movie.title || !this.movie.format) {
-        loading.dismiss();
-        return;
-      }
 
       var newMovie = await MovieService.add(this.movie, this.collectionId);
 
@@ -97,7 +127,16 @@ export default {
       this.movie = { title: '', format: 'DVD' };
       this.query = '';
 
-      this.results.add(newMovie);
+      this.results.push(newMovie);
+
+      const toast = await toastController.create({
+        message: `${this.movie.title} added.`,
+        duration: 1500,
+        swipeGesture: "vertical",
+        color: "success"
+      });
+
+      await toast.present();
 
       this.showModal = false;
     }
