@@ -42,7 +42,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.ConfigureHttpJsonOptions(opts => opts.SerializerOptions.IncludeFields = true);
+builder.Services.ConfigureHttpJsonOptions(opts => {
+    opts.SerializerOptions.IncludeFields = true;
+    opts.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 builder.Services.AddScoped<Client>(sp =>
 {

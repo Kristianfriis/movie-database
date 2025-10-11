@@ -3,14 +3,14 @@ import { loadingController } from '@ionic/core';
 // import { addOutline } from 'ionicons/icons'
 
 export default {
-    template: /*html*/`
+  template: /*html*/`
      <ion-page>
       <ion-button expand="block" @click="openModal" v-if="collections.length === 0 && !loading">
         Add New Collection
       </ion-button>
 
       <ion-list v-else>
-        <ion-item v-for="collection in collections" :key="collection.id">
+        <ion-item v-for="collection in collections" :key="collection.indexId">
           <ion-label>
             <h2>{{ collection.name }}</h2>
             <p>Role: {{ collection.role }}</p>
@@ -47,59 +47,67 @@ export default {
       </ion-modal>
     </ion-page>
   `,
-    setup() { },
-    data() {
-        return { collections: [], showModal: false, newCollectionName: '', loading: false }
+  setup() { },
+  data() {
+    return { collections: [], showModal: false, newCollectionName: '', loading: false }
+  },
+  async mounted() {
+    this.loading = true;
+    const loading = await loadingController.create({
+      message: 'Loading collections...',
+    });
+
+    loading.present();
+
+    this.collections = await MovieService.getAllCollections();
+
+    this.loading = false;
+
+    loading.dismiss();
+  },
+  methods: {
+    openModal() {
+      this.showModal = true;
     },
-    async mounted() {
-        this.loading = true;
-        const loading = await loadingController.create({
-            message: 'Loading collections...',
-        });
-
-        loading.present();
-
-        this.collections = await MovieService.getAllCollections();
-
-        this.loading = false;
-
-        loading.dismiss();
+    closeModal() {
+      this.showModal = false;
     },
-    methods: {
-        openModal() {
-            this.showModal = true;
-        },
-        closeModal() {
-            this.showModal = false;
-        },
-        async createCollection() {
-            const loading = await loadingController.create({
-                message: `Creating collection ${this.newCollectionName}...`,
-            });
+    async createCollection() {
+      const loading = await loadingController.create({
+        message: `Creating collection ${this.newCollectionName}...`,
+      });
 
-            loading.present();
+      loading.present();
 
-            if (!this.newCollectionName) {
-                alert('Please enter a collection name');
-                return;
-            }
-            var user = localStorage.getItem('user');
-            if (!user) {
-                alert('Please log in to create a collection');
-                return;
-            }
-            user = JSON.parse(user);
-            if (!user || !user.id) {
-                alert('Please log in to create a collection');
-                return;
-            }
+      if (!this.newCollectionName) {
+        alert('Please enter a collection name');
+        return;
+      }
+      var user = localStorage.getItem('user');
+      if (!user) {
+        alert('Please log in to create a collection');
+        return;
+      }
+      user = JSON.parse(user);
+      if (!user || !user.id) {
+        alert('Please log in to create a collection');
+        return;
+      }
 
-            await MovieService.createCollection(this.newCollectionName);
-            this.newCollectionName = '';
-            this.showModal = false;
-            this.collections = await MovieService.getAllCollections();
+      var id = await MovieService.createCollection(this.newCollectionName);
+      this.collections.push({
+        indexId: this.collections.length,
+        id: id,
+        name: this.newCollectionName,
+        ownerId: user.id,
+        role: 'maintainer',
+        members: [{ userId: user.id, name: user.name, role: 'maintainer' }]
+      })
 
-            loading.dismiss();
-        }
+      this.newCollectionName = '';
+      this.showModal = false;
+
+      loading.dismiss();
     }
+  }
 }

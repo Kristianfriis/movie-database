@@ -51,6 +51,9 @@ export const MovieService = {
     }
 
     var collections = await response.json();
+
+
+
     return Promise.resolve(collections || []);
   },
   /**
@@ -64,7 +67,7 @@ export const MovieService = {
       return;
     }
 
-    fetch(window.appConfig.apiUrl + '/collections', {
+    const response = await fetch(window.appConfig.apiUrl + '/collections', {
       method: 'POST',
       headers: {
         ...await authHeaders(),
@@ -75,6 +78,13 @@ export const MovieService = {
         ownerId: userId
       })
     })
+
+    if (!response.ok) {
+      return null;
+    }
+
+    var responseJson = await response.json();
+    return responseJson.id;
   },
 
   search(query) {

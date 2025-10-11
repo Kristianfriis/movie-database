@@ -106,6 +106,8 @@ public class SupabaseMovieRepository : IMovieRepository
 
         var result = new List<AvailableCollection>();
 
+        var index = 0;
+
         return collections.Models.Select(c =>
         {
             var userRole = roles.Models.First(r => r.CollectionId == c.Id).Role;
@@ -119,14 +121,19 @@ public class SupabaseMovieRepository : IMovieRepository
                     Role = Enum.Parse<CollectionRole>(r.Role ?? "reader", true)
                 }).ToList();
 
-            return new AvailableCollection
+            var coll = new AvailableCollection
             {
+                IndexId = index, // Assign and increment the index
                 Id = c.Id,
                 Name = c.Name,
                 CreatedAt = c.CreatedAt,
                 Role = Enum.Parse<CollectionRole>(userRole ?? "reader", true),
                 Members = members
             };
+
+            index++;
+
+            return coll;
         }).ToList();
     }
 
