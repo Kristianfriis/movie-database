@@ -21,7 +21,7 @@ export default {
 
       <ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="collections.length !== 0">
         <ion-fab-button @click="openModal">
-          <ion-icon icon="addOutline"></ion-icon>
+          <ion-icon icon="add-outline"></ion-icon>
         </ion-fab-button>
       </ion-fab>
 
