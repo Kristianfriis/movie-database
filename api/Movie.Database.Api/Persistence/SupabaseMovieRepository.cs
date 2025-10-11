@@ -29,7 +29,7 @@ public class SupabaseMovieRepository : IMovieRepository
     {
         var links = await _client
             .From<CollectionMovieEntity>()
-            .Filter("collection_id", Constants.Operator.Equals, collectionId)
+            .Where(l => l.CollectionId == collectionId)
             .Get();
 
         var movieIds = links.Models.Select(l => l.MovieId).ToList();
@@ -50,17 +50,18 @@ public class SupabaseMovieRepository : IMovieRepository
         {
             Id = movie.Id,
             Title = movie.Title,
-            ReleaseYear = movie.ReleaseYear,
-            CreatedAt = movie.CreatedAt
         };
 
-        await _client.From<MovieEntity>().Insert(dbMovie);
+        var inserted = await _client.From<MovieEntity>().Insert(dbMovie);
+        if (inserted.Model is null)
+        {
+            throw new Exception("Failed to insert movie");
+        }
 
         var link = new CollectionMovieEntity
         {
             CollectionId = collectionId,
-            MovieId = movie.Id,
-            AddedAt = DateTime.UtcNow
+            MovieId = inserted.Model.Id,
         };
 
         await _client.From<CollectionMovieEntity>().Insert(link);
@@ -145,7 +146,6 @@ public class SupabaseMovieRepository : IMovieRepository
         {
             Id = db.Id,
             Title = db.Title,
-            ReleaseYear = db.ReleaseYear,
             CreatedAt = db.CreatedAt
         };
     }

@@ -18,11 +18,13 @@ import { authHeaders } from './auth-helper.js'
 
 export const MovieService = {
   /** @type {Movie[]} */
-  movies: [
-    { id: 1, title: "The Matrix", format: "Blu-ray", year: 1999 },
-    { id: 2, title: "Inception", format: "DVD", year: 2010 },
-    { id: 3, title: "Interstellar", format: "Blu-ray", year: 2014 }
-  ],
+  movies: [],
+
+  /** in-memory cache keyed by collectionId -> Movie[] */
+  moviesCache: {},
+
+  /** currently loaded collectionId for this.movies */
+  currentCollectionId: null,
 
   /**
  * @returns {Promise<Movie[]>}
@@ -87,18 +89,137 @@ export const MovieService = {
     return responseJson.id;
   },
 
-  search(query) {
-    const q = query.toLowerCase()
-    const results = this.movies.filter(m =>
-      m.title.toLowerCase().includes(q)
-    )
-    return Promise.resolve(results)
+ /**
+   * Search movies in the current collection (or across all if no collectionId provided).
+   * @param {string} query
+   * @param {string} [collectionId]
+   * @returns {Promise<Movie[]>}
+   */
+  async search(query, collectionId) {
+    const q = (query || '').toLowerCase();
+
+    let source = [];
+
+    if (collectionId) {
+      // ensure we have the movies for the requested collection (will use cache when possible)
+      source = await this.getAllMovies(collectionId);
+    } else {
+      // prefer current loaded movies, otherwise search all cached movies
+      if (this.movies && this.movies.length) {
+        source = this.movies;
+      } else {
+        source = Object.values(this.moviesCache).flat();
+      }
+    }
+
+    return source.filter(m => (m.title || '').toLowerCase().includes(q));
   },
 
-  add(movie) {
-    movie.id = Date.now()
-    this.movies.push(movie)
-    return Promise.resolve(movie)
+  /**
+  * Add a movie to a collection.
+  * @param {Movie} movie
+  * @param {string} collectionId
+  * @returns {Promise<Movie>}
+  */
+  async add(movie, collectionId) {
+
+    if (!collectionId) {
+      return [];
+    }
+
+    const response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/movies', {
+      method: 'POST',
+      headers: {
+        ...await authHeaders(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(movie)
+    })
+
+    if (!response.ok) {
+      return null;
+    }
+
+    var responseJson = await response.json();
+
+    var movieToReturn = {
+      id: responseJson.id,
+      title: movie.title,
+      format: movie.format,
+      year: movie.year
+    }
+
+    // update in-memory cache for this collection
+    if (!this.moviesCache[collectionId]) {
+      this.moviesCache[collectionId] = [];
+    }
+    this.moviesCache[collectionId].push(movieToReturn);
+
+    // if currently viewing this collection, update this.movies so UI re-renders
+    if (this.currentCollectionId === collectionId) {
+      // assign a new array to ensure reactivity
+      this.movies = [...this.moviesCache[collectionId]];
+    }
+
+    return movieToReturn;
+  },
+
+  /**
+   * Get all movies in a collection.
+   * @param {string} collectionId
+   * @param {boolean} [forceRefresh=false] - set true to bypass cache and fetch from server
+   * @returns {Promise<Movie[]>}
+   */
+  async getAllMovies(collectionId, forceRefresh = false) {
+    if (!collectionId) {
+      return [];
+    }
+
+    // return cached copy unless forceRefresh
+    if (!forceRefresh && this.moviesCache[collectionId]) {
+      this.currentCollectionId = collectionId;
+      // return a shallow copy to avoid external mutation of cache
+      this.movies = [...this.moviesCache[collectionId]];
+      return Promise.resolve(this.movies);
+    }
+
+    const response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/movies', {
+      headers: {
+        ...await authHeaders(),
+      }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    var movies = await response.json() || [];
+
+    // store in cache and set current movies
+    this.moviesCache[collectionId] = movies;
+    this.currentCollectionId = collectionId;
+    // assign a copy for reactivity
+    this.movies = [...movies];
+
+    return this.movies;
+  },
+
+  /**
+ * Clear movies cache. If collectionId is provided clears only that collection, otherwise clears all.
+ * @param {string} [collectionId]
+ */
+  clearMoviesCache(collectionId) {
+    if (collectionId) {
+      delete this.moviesCache[collectionId];
+      if (this.currentCollectionId === collectionId) {
+        this.currentCollectionId = null;
+        this.movies = [];
+      }
+    } else {
+      this.moviesCache = {};
+      this.currentCollectionId = null;
+      this.movies = [];
+    }
   },
 
   getUserId() {

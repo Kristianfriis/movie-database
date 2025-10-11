@@ -12,9 +12,6 @@ public class MovieEntity : BaseModel
     [Column("title")]
     public string? Title { get; set; }
 
-    [Column("release_year")]
-    public int? ReleaseYear { get; set; }
-
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 }

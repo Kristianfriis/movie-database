@@ -1,6 +1,5 @@
 import { MovieService } from "../../services/movie-service.js";
 import { loadingController } from '@ionic/core';
-// import { addOutline } from 'ionicons/icons'
 
 export default {
   template: /*html*/`
@@ -10,7 +9,7 @@ export default {
       </ion-button>
 
       <ion-list v-else>
-        <ion-item v-for="collection in collections" :key="collection.indexId">
+          <ion-item v-for="collection in collections" :key="collection.indexId" button @click="openCollection(collection.id)">
           <ion-label>
             <h2>{{ collection.name }}</h2>
             <p>Role: {{ collection.role }}</p>
@@ -28,7 +27,7 @@ export default {
       <ion-modal :is-open="showModal" @didDismiss="closeModal">
           <ion-header>
             <ion-toolbar>
-              <ion-title>New Collection</ion-title>
+              <ion-title>New movie</ion-title>
               <ion-buttons slot="end">
                 <ion-button @click="closeModal">Close</ion-button>
               </ion-buttons>
@@ -71,6 +70,10 @@ export default {
     },
     closeModal() {
       this.showModal = false;
+    },
+    openCollection(collectionId) {
+      // navigate to /search/{collectionId}
+      this.$router.push(`/search/${collectionId}`);
     },
     async createCollection() {
       const loading = await loadingController.create({

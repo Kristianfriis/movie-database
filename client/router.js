@@ -18,7 +18,7 @@ const routes = [
   { path: '/confirm', component: Confirm },
   { path: '/profile', component: Profile },
   { path: '/profile/:email', component: Profile },
-  { path: '/search', component: Search },
+  { path: '/search/:collectionId', component: Search },
   { path: '/add', component: Add },
   { path: '/details/:id', component: Details },
   { path: '/', component: AllCollectionsPage },

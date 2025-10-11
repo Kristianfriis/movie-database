@@ -6,12 +6,12 @@ namespace Movie.Database.Api.Persistence.Entities;
 [Table("collection_movies")]
 public class CollectionMovieEntity : BaseModel
 {
-    [PrimaryKey("collection_id", false)]
+    [PrimaryKey("id", false)]
+    public Guid Id { get; set; }
+
+    [Column("collection_id")]
     public Guid CollectionId { get; set; }
 
-    [PrimaryKey("movie_id", false)]
+    [Column("movie_id")]
     public Guid MovieId { get; set; }
-
-    [Column("added_at")]
-    public DateTime AddedAt { get; set; }
 }
