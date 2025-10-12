@@ -57,7 +57,7 @@ export default {
         <div class="ion-margin-top">
           <ion-text>
             Don't have an account?
-            <a @click="navigate('/register')">Sign up</a>
+            <a @click="navigate('/signup')">Sign up</a>
           </ion-text>
           <br />
           <ion-text>
