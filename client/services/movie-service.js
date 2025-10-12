@@ -223,15 +223,14 @@ export const MovieService = {
   },
 
   async generateInviteLink(collectionId) {
-    // return window.appConfig.clientUrl + '/confirm?collectionId=' + collectionId;
     if (!collectionId) {
       return null;
     }
 
-    var response = await fetch(window.appConfig.apiUrl + '/collections/'  + collectionId + '/invite', {
+    var response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/invite', {
       method: 'POST',
       headers: {
-         ...await authHeaders(),
+        ...await authHeaders(),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({})
@@ -242,8 +241,41 @@ export const MovieService = {
     }
 
     var responseJson = await response.json();
-    
+
     return responseJson;
+  },
+
+  /**
+   * Accept an invite to join a collection.
+   * @param {string} token
+   * @returns {Promise<boolean>}
+   */
+  async acceptInvite(token) {
+    if (!token) {
+      return false;
+    }
+
+    var userId = this.getUserId();
+    if (!userId) {
+      return false;
+    }
+
+    var requestBody = { token, userId };
+
+    var response = await fetch(window.appConfig.apiUrl + '/collections/join', {
+      method: 'POST',
+      headers: {
+        ...await authHeaders(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+
+    if (!response.ok) {
+      return false;
+    }
+
+    return true;
   },
 
   getUserId() {

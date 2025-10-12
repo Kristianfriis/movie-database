@@ -11,6 +11,7 @@ import Confirm from './components/auth/Confirm.js'
 import Profile from './components/auth/Profile.js'
 import AllCollectionsPage from './components/collections/AllCollectionsPage.js';
 import AddUserToCollection from './components/collections/AddUserToCollection.js';
+import ScanCode from './components/collections/ScanCode.js';
 
 const routes = [
   { path: '/login', component: Login },
@@ -24,6 +25,7 @@ const routes = [
   { path: '/details/:id', component: Details },
   { path: '/', component: AllCollectionsPage },
   { path: '/add-user-to-collection/:collectionId', component: AddUserToCollection },
+  { path: '/scan-code', component: ScanCode },
 ]
 
 const router = createRouter({

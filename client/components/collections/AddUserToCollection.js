@@ -32,8 +32,10 @@ export default {
         generateQrCode() {
             this.qrCodeGenerated = true;
 
+            console.log("Generating QR code for URL: " + this.inviteUrl.key);
+
             var qrcode = new QRCode(this.$refs.qrContainer, {
-                text: "https://example.com",
+                text: this.inviteUrl.key,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H

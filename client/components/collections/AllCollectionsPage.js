@@ -19,9 +19,17 @@ export default {
       </ion-list>
 
       <ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="collections.length !== 0">
-        <ion-fab-button @click="openModal">
-          <ion-icon icon="add-outline"></ion-icon>
+      <ion-fab-button>
+          <ion-icon name="chevron-up-circle"></ion-icon>
         </ion-fab-button>
+        <ion-fab-list side="top">
+          <ion-fab-button color="primary" @click="openModal">
+            <ion-icon name="add-outline" ></ion-icon>
+          </ion-fab-button>
+          <ion-fab-button color="primary" @click="navigateToQrScanner">
+            <ion-icon name="qr-code-outline"></ion-icon>
+          </ion-fab-button>
+        </ion-fab-list>
       </ion-fab>
 
       <ion-modal :is-open="showModal" @didDismiss="closeModal">
@@ -74,6 +82,9 @@ export default {
     openCollection(collectionId) {
       // navigate to /search/{collectionId}
       this.$router.push(`/search/${collectionId}`);
+    },
+    navigateToQrScanner() {
+      this.$router.push('/scan-code');
     },
     async createCollection() {
       const loading = await loadingController.create({
