@@ -19,15 +19,22 @@ export default {
         this.success = 'Password reset link sent. Check your inbox.'
         this.error = null
       }
+    },
+    goBack() {
+      window.history.back();
     }
   },
   template: /*html*/`
     <ion-page>
-      <ion-content class="ion-padding">
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-back-button defaultHref="/" @click="goBack"></ion-back-button>
+          </ion-buttons>
+          <ion-title>Reset Password</ion-title>
+        </ion-toolbar>
+      </ion-header>
         <ion-card>
-          <ion-card-header>
-            <ion-card-title>Reset Password</ion-card-title>
-          </ion-card-header>
           <ion-card-content>
             <ion-input label="Email" v-model="email" type="email" />
             <ion-button expand="block" @click="reset">Send Reset Link</ion-button>
@@ -35,7 +42,7 @@ export default {
             <ion-text color="danger" v-if="error">{{ error }}</ion-text>
           </ion-card-content>
         </ion-card>
-      </ion-content>
+
     </ion-page>
   `
 }

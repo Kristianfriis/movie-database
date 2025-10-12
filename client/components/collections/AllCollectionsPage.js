@@ -4,12 +4,25 @@ import { loadingController } from '@ionic/core';
 export default {
   template: /*html*/`
      <ion-page>
+       <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+          </ion-buttons>
+          <ion-title>Collections</ion-title>
+           <ion-buttons slot="secondary">
+            <ion-button @click="refreshCollections">
+              <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
       <ion-button expand="block" @click="openModal" v-if="collections.length === 0 && !loading">
         Add New Collection
       </ion-button>
 
       <ion-list v-else>
-          <ion-item v-for="collection in collections" :key="collection.indexId" button @click="openCollection(collection.id)">
+          <ion-item v-for="collection in collections" :key="collection.indexId" button @click="openCollection(collection.id)" detail="true">
           <ion-label>
             <h2>{{ collection.name }}</h2>
             <p>Role: {{ collection.role }}</p>
@@ -85,6 +98,19 @@ export default {
     },
     navigateToQrScanner() {
       this.$router.push('/scan-code');
+    },
+    async refreshCollections() {
+      const loading = await loadingController.create({
+        message: 'Refreshing collections...',
+      });
+
+      loading.present();
+
+      this.collections = await MovieService.getAllCollections(true);
+
+      this.loading = false;
+
+      loading.dismiss();
     },
     async createCollection() {
       const loading = await loadingController.create({

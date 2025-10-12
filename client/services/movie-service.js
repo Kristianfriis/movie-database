@@ -26,6 +26,9 @@ export const MovieService = {
   /** currently loaded collectionId for this.movies */
   currentCollectionId: null,
 
+  /** currently loaded collections */
+  collections: [],
+
   /**
  * @returns {Promise<Movie[]>}
  */
@@ -36,10 +39,17 @@ export const MovieService = {
   /**
  * @returns {Promise<Collection[]>}
  */
-  async getAllCollections() {
+  async getAllCollections(forceRefresh = false) {
     var userId = this.getUserId();
     if (!userId) {
       return [];
+    }
+
+    // return cached copy unless forceRefresh
+    if (!forceRefresh && this.collections && this.collections.length) {
+      // return a shallow copy to avoid external mutation of cache
+      this.collections = [...this.collections];
+      return Promise.resolve(this.collections);
     }
 
     const response = await fetch(window.appConfig.apiUrl + '/collections/' + userId, {
@@ -54,9 +64,12 @@ export const MovieService = {
 
     var collections = await response.json();
 
+    // store in cache and set current movies
+    this.collections = collections;
+    // assign a copy for reactivity
+    this.collections = [...collections];
 
-
-    return Promise.resolve(collections || []);
+    return Promise.resolve(this.collections || []);
   },
   /**
    * Create a collection for the current user.

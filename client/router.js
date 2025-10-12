@@ -2,7 +2,6 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import { supabase } from './services/supabase.js'
 
 import Search from './components/Search.js'
-import Add from './components/Add.js'
 import Details from './components/Details.js'
 import Login from './components/auth/Login.js'
 import Signup from './components/auth/Signup.js'
@@ -13,19 +12,35 @@ import AllCollectionsPage from './components/collections/AllCollectionsPage.js';
 import AddUserToCollection from './components/collections/AddUserToCollection.js';
 import ScanCode from './components/collections/ScanCode.js';
 
-const routes = [
+const authRoutes = [
   { path: '/login', component: Login },
   { path: '/signup', component: Signup },
   { path: '/reset', component: ResetPassword },
   { path: '/confirm', component: Confirm },
+]
+
+const profileRoutes = [
   { path: '/profile', component: Profile },
   { path: '/profile/:email', component: Profile },
+]
+
+const collectionRoutes = [
   { path: '/search/:collectionId', component: Search },
-  { path: '/add', component: Add },
-  { path: '/details/:id', component: Details },
+  { path: '/details/:id/:collectionId', component: Details },
+  { path: '/details/:id/', component: Details },
   { path: '/', component: AllCollectionsPage },
   { path: '/add-user-to-collection/:collectionId', component: AddUserToCollection },
+]
+
+const utilityRoutes = [
   { path: '/scan-code', component: ScanCode },
+]
+
+const routes = [
+  ...authRoutes,
+  ...profileRoutes,
+  ...collectionRoutes,
+  ...utilityRoutes,
 ]
 
 const router = createRouter({
@@ -36,10 +51,15 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Public (unauthenticated) routes
-  const publicPaths = ['/login', '/signup', '/reset']
+  // All auth routes are public
+  const publicPaths = authRoutes.map(r => r.path)
 
-  if (!user && !publicPaths.includes(to.path)) {
+  const alwaysPublic = []
+  const allowedPaths = [...publicPaths, ...alwaysPublic]
+
+  const isPublic = allowedPaths.some(path => to.path.startsWith(path))
+
+  if (!user && !isPublic) {
     next('/login')
   } else {
     next()

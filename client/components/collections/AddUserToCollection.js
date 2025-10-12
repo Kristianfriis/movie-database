@@ -3,6 +3,16 @@ import { MovieService } from "../../services/movie-service.js";
 export default {
     template: /*html*/`
     <ion-page>
+    <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+          </ion-buttons>
+          <ion-title>Add User</ion-title>
+        </ion-toolbar>
+      </ion-header>
+
+
         <ion-card v-if="inviteUrl">
         <ion-card-header>
             <ion-card-title v-if="!qrCodeGenerated">Generate QR Code</ion-card-title>

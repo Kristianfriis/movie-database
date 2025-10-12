@@ -23,15 +23,22 @@ export default {
         this.success = 'Check your email to confirm your account.'
         this.error = null
       }
+    },
+    goBack() {
+      window.history.back();
     }
   },
   template: /*html*/`
     <ion-page>
-      <ion-content class="ion-padding">
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-back-button defaultHref="/" @click="goBack"></ion-back-button>
+          </ion-buttons>
+          <ion-title>Sign up</ion-title>
+        </ion-toolbar>
+      </ion-header>
         <ion-card>
-          <ion-card-header>
-            <ion-card-title>Sign Up</ion-card-title>
-          </ion-card-header>
           <ion-card-content>
             <ion-input label="Email" v-model="email" type="email" />
             <ion-input label="Password" v-model="password" type="password" />
@@ -40,7 +47,6 @@ export default {
             <ion-text color="danger" v-if="error">{{ error }}</ion-text>
           </ion-card-content>
         </ion-card>
-      </ion-content>
     </ion-page>
   `
 }

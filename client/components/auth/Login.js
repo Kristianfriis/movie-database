@@ -42,11 +42,14 @@ export default {
   },
   template: /*html*/`
   <ion-page>
-  <ion-content class="ion-padding">
+        <ion-header>
+        <ion-toolbar>
+          <ion-title>Login</ion-title>
+        </ion-toolbar>
+      </ion-header>
+
+
     <ion-card>
-      <ion-card-header>
-        <ion-card-title>Login</ion-card-title>
-      </ion-card-header>
       <ion-card-content>
         <ion-input label="Email" v-model="email" type="email" />
         <ion-input label="Password" v-model="password" type="password" />
@@ -67,7 +70,6 @@ export default {
         </div>
       </ion-card-content>
     </ion-card>
-  </ion-content>
 </ion-page>
 
   `

@@ -88,7 +88,15 @@ export default {
   },
   template: /*html*/`
     <ion-page>
-      <ion-content class="ion-padding">
+          <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+          </ion-buttons>
+          <ion-title>Profile</ion-title>
+        </ion-toolbar>
+      </ion-header>
+
           <ion-card>
             <ion-card-header>
                 <ion-card-title v-if="createProfile">Create Profile</ion-card-title>
@@ -107,7 +115,6 @@ export default {
                 <ion-button expand="block" @click="updateProflile" v-else>Update</ion-button>
             </ion-card-content>
           </ion-card>
-      </ion-content>
     </ion-page>
     `
 }

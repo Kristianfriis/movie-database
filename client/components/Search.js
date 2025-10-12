@@ -5,6 +5,20 @@ import { IonSelect, IonSelectOption } from '@ionic/ionicvue';
 export default {
   template: /*html*/`
   <ion-page>
+ <ion-header>
+        <ion-toolbar>
+       <ion-buttons slot="start">
+            <ion-back-button defaultHref="/" @click="goBack"></ion-back-button>
+          </ion-buttons>
+          <ion-title>Movies</ion-title>
+             <ion-buttons slot="secondary">
+            <ion-button @click="refreshMovies">
+              <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
     <ion-fab slot="fixed" vertical="bottom" horizontal="end">
    <ion-fab-button>
       <ion-icon name="chevron-up-circle"></ion-icon>
@@ -27,10 +41,8 @@ export default {
         <ion-item>
           <ion-input v-model="query" @input="search" placeholder="Search..."></ion-input>
         </ion-item>
-        <ion-item v-for="movie in results" :key="movie.id" button>
-          <router-link :to="'/details/' + movie.id">
+        <ion-item v-for="movie in results" :key="movie.id" button detail="true" @click="navigateDetails(movie.id)">
             {{ movie.title }} - {{ movie.format }}
-          </router-link>
         </ion-item>
       </ion-list>
 
@@ -90,6 +102,23 @@ export default {
     });
   },
   methods: {
+    navigateDetails(id) {
+      this.$router.push(`/details/${id}`);
+    },
+    async refreshMovies() {
+      const loading = await loadingController.create({
+        message: 'Refreshing movies...',
+      });
+
+      loading.present();
+
+      this.results = await MovieService.getAllMovies(this.collectionId);
+
+      loading.dismiss()
+    },
+    goBack() {
+      window.history.back();
+    },
     openModal() {
       this.showModal = true;
     },

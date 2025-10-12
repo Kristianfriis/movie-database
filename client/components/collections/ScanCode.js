@@ -4,6 +4,14 @@ import { MovieService } from '../../services/movie-service.js';
 export default {
     template: /*html*/`
     <ion-page>
+        <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+          </ion-buttons>
+          <ion-title>Join</ion-title>
+        </ion-toolbar>
+      </ion-header>
         <h1>Scan QR Code to Join Collection</h1>
         <div id="qr-reader"></div>
         <ion-text v-if="status">{{ status }}</ion-text>
