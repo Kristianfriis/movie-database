@@ -36,7 +36,10 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (to.path !== '/login' && !user) {
+  // Public (unauthenticated) routes
+  const publicPaths = ['/login', '/signup', '/reset']
+
+  if (!user && !publicPaths.includes(to.path)) {
     next('/login')
   } else {
     next()
