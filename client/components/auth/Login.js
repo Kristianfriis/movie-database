@@ -12,6 +12,9 @@ export default {
     }
   },
   methods: {
+    navigate(path) {
+     this.$router.push(path)
+    },
     async login() {
       const loading = await loadingController.create({
         message: 'Logging in...',
@@ -54,12 +57,12 @@ export default {
         <div class="ion-margin-top">
           <ion-text>
             Don't have an account?
-            <a href="#/signup">Sign up</a>
+            <a @click="navigate('/register')">Sign up</a>
           </ion-text>
           <br />
           <ion-text>
             Forgot your password?
-            <a href="#/reset">Reset it</a>
+            <a @click="navigate('/reset')">Reset it</a>
           </ion-text>
         </div>
       </ion-card-content>
