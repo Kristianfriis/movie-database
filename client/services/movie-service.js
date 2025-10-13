@@ -291,6 +291,29 @@ export const MovieService = {
     return true;
   },
 
+  async addUserToCollection(collectionId, userId, role) {
+    var requestBody = {
+      collectionId,
+      userId,
+      role
+    }
+
+    var response = await fetch(window.appConfig.apiUrl + '/collections/join', {
+      method: 'POST',
+      headers: {
+        ...await authHeaders(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+
+    if (!response.ok) {
+      return false;
+    }
+
+    return true;
+  },
+
   getUserId() {
     var user = localStorage.getItem('user');
     if (!user) {

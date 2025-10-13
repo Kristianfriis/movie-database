@@ -39,9 +39,6 @@ export default {
           <ion-fab-button color="primary" @click="openModal">
             <ion-icon name="add-outline" ></ion-icon>
           </ion-fab-button>
-          <ion-fab-button color="primary" @click="navigateToQrScanner">
-            <ion-icon name="qr-code-outline"></ion-icon>
-          </ion-fab-button>
         </ion-fab-list>
       </ion-fab>
 
@@ -95,9 +92,6 @@ export default {
     openCollection(collectionId) {
       // navigate to /search/{collectionId}
       this.$router.push(`/search/${collectionId}`);
-    },
-    navigateToQrScanner() {
-      this.$router.push('/scan-code');
     },
     async refreshCollections() {
       const loading = await loadingController.create({

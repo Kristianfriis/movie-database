@@ -60,7 +60,7 @@ builder.Services.AddScoped<Client>(sp =>
     });
 });
 
-builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMovieRepository, SupabaseMovieRepository>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
 

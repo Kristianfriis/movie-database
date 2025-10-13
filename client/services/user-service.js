@@ -26,7 +26,7 @@ export const UserService = {
 
         var user = await response.json();
 
-        if(user.exists === false){
+        if (user.exists === false) {
             return null;
         }
 
@@ -56,7 +56,7 @@ export const UserService = {
             if (!response.ok) {
                 return null;
             }
-            
+
             var savedUser = await response.json();
             try {
                 localStorage.setItem('user', JSON.stringify(savedUser));
@@ -83,7 +83,7 @@ export const UserService = {
             if (!response.ok) {
                 return null;
             }
-            
+
             var savedUser = await response.json();
             try {
                 localStorage.setItem('user', JSON.stringify(savedUser));
@@ -94,5 +94,19 @@ export const UserService = {
         } catch (e) {
             return null;
         }
+    },
+
+    async getAllUsers() {
+        const response = await fetch(this.endpoint + '/all', {
+            headers: {
+                ...await authHeaders(),
+            }
+        });
+
+        if (!response.ok) {
+            return null;
+        }
+
+        return await response.json();
     }
 }

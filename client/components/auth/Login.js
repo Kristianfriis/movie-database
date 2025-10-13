@@ -48,7 +48,6 @@ export default {
         </ion-toolbar>
       </ion-header>
 
-
     <ion-card>
       <ion-card-content>
         <ion-input label="Email" v-model="email" type="email" />

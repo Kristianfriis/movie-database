@@ -70,7 +70,7 @@ public static class MovieEndpoints
             return Results.Created($"/collections/{id}", new { id });
         });
 
-        collections.MapPost("/{collectionId:guid}/invite", async (Guid collectionId, ClaimsPrincipal user, IConfiguration config, ICollectionService collectionService, UserRepository userRepo) =>
+        collections.MapPost("/{collectionId:guid}/invite", async (Guid collectionId, ClaimsPrincipal user, IConfiguration config, ICollectionService collectionService, IUserRepository userRepo) =>
         {
             var metaData = user.GetUserId();
 
@@ -90,14 +90,47 @@ public static class MovieEndpoints
             return Results.Ok(new { key });
         }).Produces<string>();
 
-        collections.MapPost("/join", async ([FromBody] JoinCollectionRequest request, [FromServices] IConfiguration config, [FromServices] ICollectionService collectionService) =>
+        collections.MapPost("/join", async ([FromBody] JoinCollectionRequest request, [FromServices] IConfiguration config, [FromServices] ICollectionService collectionService, ClaimsPrincipal user, [FromServices] IUserRepository userRepo) =>
         {
-            var (success, error) = await collectionService.JoinCollectionAsync(request.Token, request.UserId);
+            var metaData = user.GetUserId();
+
+            if (metaData is null)
+                return Results.Unauthorized();
+
+            var existingUser = await userRepo.GetUserByAuthId(metaData.sub);
+            if (existingUser is null)
+                return Results.NotFound("User not found");
+
+            var mappedRole = (CollectionRole)request.Role;
+
+            var (success, error) = await collectionService.JoinCollectionAsync(request.CollectionId, Guid.Parse(existingUser.Id), request.UserIdToAdd, mappedRole);
 
             if (!success)
                 return Results.BadRequest(error);
 
             return Results.Ok();
         });
+        
+        collections.MapGet("/collectionInfo/{collectionId:guid}", async (Guid collectionId, ICollectionService collectionService, ClaimsPrincipal user, IUserRepository userRepo)  =>
+        {
+             var metaData = user.GetUserId();
+
+            if (metaData is null)
+                return Results.Unauthorized();
+
+            var existingUser = await userRepo.GetUserByAuthId(metaData.sub);
+            if (existingUser is null)
+                return Results.NotFound("User not found");
+
+            var result = await collectionService.GetCollectionInfoAsync(collectionId, Guid.Parse(existingUser.Id));
+
+            if (result.error is not null)
+                return Results.BadRequest(result.error);
+
+            var collection = result.availableCollection;
+
+            return Results.Ok(collection);
+        }).Produces<CollectionInfoDto>();
+    
     }
 }

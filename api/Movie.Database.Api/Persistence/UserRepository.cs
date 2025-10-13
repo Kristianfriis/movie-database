@@ -1,10 +1,11 @@
 using System;
+using Movie.Database.Api.Interfaces;
 using Movie.Database.Api.Models;
 using Movie.Database.Api.Persistence.Entities;
 
 namespace Movie.Database.Api.Persistence;
 
-public class UserRepository
+public class UserRepository : IUserRepository
 {
     protected readonly Supabase.Client _client;
 
@@ -115,5 +116,22 @@ public class UserRepository
         };
 
         return mappedResult;
+    }
+
+    public async Task<List<User>> GetAllUsersAsync()
+    {
+        var existing = await _client
+         .From<UserEntity>()
+         .Get();
+
+        var result = existing.Models.Select(u => new User
+        {
+            Id = u.Id,
+            Email = u.Email,
+            Name = u.Name,
+            CreatedAt = u.CreatedAt
+        }).ToList();
+
+        return result;
     }
 }

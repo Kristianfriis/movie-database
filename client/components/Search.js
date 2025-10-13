@@ -26,7 +26,6 @@ export default {
     <ion-fab-list side="top">
       <ion-fab-button color="primary" @click="openModal">
         <ion-icon name="add-outline" ></ion-icon>
-        <ion-icon name="film"></ion-icon>
       </ion-fab-button>
       <ion-fab-button color="primary" @click="navigateToAddUser">
         <ion-icon name="person-add"></ion-icon>
@@ -117,7 +116,7 @@ export default {
       loading.dismiss()
     },
     goBack() {
-      window.history.back();
+      this.$router.back();  
     },
     openModal() {
       this.showModal = true;

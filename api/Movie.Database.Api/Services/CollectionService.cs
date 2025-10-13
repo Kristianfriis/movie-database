@@ -96,6 +96,41 @@ public class CollectionService : ICollectionService
             return (false, ex.Message);
         }
     }
+
+    public async Task<(bool success, string? error)> JoinCollectionAsync(Guid collectionId, Guid userId, Guid userIdToAdd, CollectionRole role)
+    {
+        if (!await _repo.IsMaintainerAsync(collectionId, userId))
+            return (false, "User is not a maintainer of the collection");
+
+        var coll = await _repo.GetAvailableCollectionsAsync(userIdToAdd);
+
+        var exist = coll.FirstOrDefault(c => c.Id == collectionId);
+
+        if (exist is not null)
+            return (false, "User is already in the collection");
+
+        try
+        {
+            await _repo.AddMemberAsync(collectionId, userIdToAdd, role);
+            return (true, null);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public async Task<(AvailableCollection? availableCollection, string? error)> GetCollectionInfoAsync(Guid collectionId, Guid userId)
+    {
+        var coll = await _repo.GetAvailableCollectionsAsync(userId);
+
+        var exist = coll.FirstOrDefault(c => c.Id == collectionId);
+
+        if (exist is null)
+            return (null, "Collection not found");
+
+        return (exist, null);
+    }
 }
 
 record InvitePayload(string collectionId, DateTime exp);

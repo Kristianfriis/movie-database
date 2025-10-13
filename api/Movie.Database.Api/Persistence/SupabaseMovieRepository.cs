@@ -180,9 +180,16 @@ public class SupabaseMovieRepository : IMovieRepository
         return newCollection.Id;
     }
 
-    public Task AddMemberAsync(Guid collectionId, Guid userId, CollectionRole role)
+    public async Task AddMemberAsync(Guid collectionId, Guid userId, CollectionRole role)
     {
-        throw new NotImplementedException();
+        var roleEntity = new UserCollectionRoleEntity
+        {
+            UserId = userId,
+            CollectionId = collectionId,
+            Role = role.ToString().ToLower(),
+        };
+
+        await _client.From<UserCollectionRoleEntity>().Insert(roleEntity);
     }
 
     public Task UpdateMemberRoleAsync(Guid collectionId, Guid userId, CollectionRole role)
@@ -208,7 +215,7 @@ public class SupabaseMovieRepository : IMovieRepository
 
         if (role.Role is null) return false;
 
-        if(role.Role.Equals(CollectionRole.Maintainer.ToString().ToLower(), StringComparison.OrdinalIgnoreCase))
+        if (role.Role.Equals(CollectionRole.Maintainer.ToString().ToLower(), StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
