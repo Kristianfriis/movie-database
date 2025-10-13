@@ -129,7 +129,18 @@ public static class MovieEndpoints
 
             var collection = result.availableCollection;
 
-            return Results.Ok(collection);
+            if (collection is null)
+                return Results.NotFound("Collection not found");
+
+            var mappedResponse = new CollectionInfoDto
+            {
+                Id = collection.Id,
+                Name = collection?.Name,
+                CreatedAt = collection!.CreatedAt,
+                RoleForCurrentUser = Enum.Parse<CollectionRoleDto>(collection.Role.ToString().ToLower(), true)
+            };
+
+            return Results.Ok(mappedResponse);
         }).Produces<CollectionInfoDto>();
     
     }

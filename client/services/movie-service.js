@@ -16,6 +16,14 @@ import { authHeaders } from './auth-helper.js'
  * @property {Movie[]} [movies]
  */
 
+/**  
+ * @typedef {Object} CollectionInfo
+ * @property {string} id
+ * @property {string} name
+ * @property {string} roleForCurrentUser
+ * @property {boolean} isMaintainer
+ */
+
 export const MovieService = {
   /** @type {Movie[]} */
   movies: [],
@@ -312,6 +320,30 @@ export const MovieService = {
     }
 
     return true;
+  },
+
+    /**
+   * Returns the collection info.
+   * @param {string} collectionId
+   * @returns {Promise<CollectionInfo>}
+   */
+  async getCollectionInfo(collectionId) {
+
+    var response = await fetch(window.appConfig.apiUrl + '/collections/collectionInfo/' + collectionId, {
+      headers: {
+        ...await authHeaders(),
+      }
+    })
+
+    if(!response.ok) {
+      return null;
+    }
+
+    var result = await response.json()
+
+    result.isMaintainer = result.roleForCurrentUser.toLowerCase() === 'maintainer';
+
+    return result;
   },
 
   getUserId() {

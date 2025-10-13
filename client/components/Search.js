@@ -10,7 +10,7 @@ export default {
        <ion-buttons slot="start">
             <ion-back-button defaultHref="/" @click="goBack"></ion-back-button>
           </ion-buttons>
-          <ion-title>Movies</ion-title>
+          <ion-title>Movies for {{ collectionInfo.name }}</ion-title>
              <ion-buttons slot="secondary">
             <ion-button @click="refreshMovies">
               <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
@@ -19,7 +19,7 @@ export default {
         </ion-toolbar>
       </ion-header>
 
-    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="collectionInfo.isMaintainer">
    <ion-fab-button>
       <ion-icon name="chevron-up-circle"></ion-icon>
     </ion-fab-button>
@@ -77,7 +77,14 @@ export default {
   `,
   components: { IonSelect, IonSelectOption },
   data() {
-    return { query: '', results: [], movie: { title: '', year: '', format: 'DVD' }, collectionId: null, showModal: false }
+    return { 
+      query: '', 
+      results: [], 
+      movie: { title: '', year: '', format: 'DVD' }, 
+      collectionId: null, 
+      showModal: false,
+      collectionInfo: { name: '', roleForCurrentUser: '', isMaintainer: false }
+    }
   },
   async created() {
     const loading = await loadingController.create({
@@ -91,6 +98,7 @@ export default {
       this.collectionId = collectionId;
     }
 
+    this.collectionInfo = await MovieService.getCollectionInfo(collectionId);
     this.results = await MovieService.getAllMovies(collectionId);
 
     loading.dismiss();
