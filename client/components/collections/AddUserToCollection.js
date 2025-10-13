@@ -144,7 +144,30 @@ export default {
 
             var response = await MovieService.addUserToCollection(this.collectionId, this.chosenUser.id, this.chosenUser.role);
 
+            if (response.error) {
+                const toast = await toastController.create({
+                    message: 'Something went wrong.',
+                    duration: 1500,
+                    swipeGesture: "vertical",
+                    color: "danger"
+                });
+
+                await toast.present();
+                return;
+            }
+
             loading.dismiss();
+
+            const toast = await toastController.create({
+                message: `User ${this.chosenUser.name} added to collection.`,
+                duration: 1500,
+                swipeGesture: "vertical",
+                color: "success"
+            });
+
+            await toast.present();
+
+            this.closeModal();
         }
     }
 }

@@ -137,7 +137,13 @@ public static class MovieEndpoints
                 Id = collection.Id,
                 Name = collection?.Name,
                 CreatedAt = collection!.CreatedAt,
-                RoleForCurrentUser = Enum.Parse<CollectionRoleDto>(collection.Role.ToString().ToLower(), true)
+                RoleForCurrentUser = (CollectionRoleDto)collection.Role,
+                users = collection.Members.Select(m => new CollectionInfoUserDto
+                {
+                    Id = m.UserId,
+                    Name = m.Name,
+                    CurrentRole = (CollectionRoleDto)m.Role
+                }).ToList()
             };
 
             return Results.Ok(mappedResponse);

@@ -16,12 +16,20 @@ import { authHeaders } from './auth-helper.js'
  * @property {Movie[]} [movies]
  */
 
+/**
+ * @typedef {Object} CollectionUser
+ * @property {number|string} id
+ * @property {string} name
+ * @property {string} currentRole
+ */
+
 /**  
  * @typedef {Object} CollectionInfo
  * @property {string} id
  * @property {string} name
  * @property {string} roleForCurrentUser
- * @property {boolean} isMaintainer
+ * @property {boolean} isMaintainer,
+ * @property {CollectionUser[]} Users,
  */
 
 export const MovieService = {
@@ -36,6 +44,9 @@ export const MovieService = {
 
   /** currently loaded collections */
   collections: [],
+
+  /** currently loaded collectionInfos */
+  collectionInfos: [],
 
   /**
  * @returns {Promise<Movie[]>}
@@ -323,11 +334,23 @@ export const MovieService = {
   },
 
     /**
-   * Returns the collection info.
+   * Returns the collection info. Use forceRefresh to clear cache.
    * @param {string} collectionId
+   * @param {boolean} forceRefresh
    * @returns {Promise<CollectionInfo>}
    */
-  async getCollectionInfo(collectionId) {
+  async getCollectionInfo(collectionId, forceRefresh = false) {
+
+      // return cached copy unless forceRefresh
+    if (!forceRefresh && this.collectionInfos && this.collectionInfos.length) {
+      // return a shallow copy to avoid external mutation of cache
+      var collectionToReturn = this.collectionInfos.find(c => c.id === collectionId);
+      if (collectionToReturn) {
+        return Promise.resolve(collectionToReturn);
+      }
+      return null;
+    }
+
 
     var response = await fetch(window.appConfig.apiUrl + '/collections/collectionInfo/' + collectionId, {
       headers: {
@@ -342,6 +365,8 @@ export const MovieService = {
     var result = await response.json()
 
     result.isMaintainer = result.roleForCurrentUser.toLowerCase() === 'maintainer';
+
+    this.collectionInfos.push(result);
 
     return result;
   },

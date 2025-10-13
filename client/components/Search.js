@@ -31,7 +31,7 @@ export default {
         <ion-icon name="person-add"></ion-icon>
       </ion-fab-button>
       <ion-fab-button color="primary">
-        <ion-icon name="settings"></ion-icon>
+        <ion-icon name="settings" @click="navigateToSettings"></ion-icon>
       </ion-fab-button>
     </ion-fab-list>
     </ion-fab>
@@ -122,6 +122,9 @@ export default {
       this.results = await MovieService.getAllMovies(this.collectionId);
 
       loading.dismiss()
+    },
+    navigateToSettings() {
+      this.$router.push(`/settings/${this.collectionId}`);
     },
     goBack() {
       this.$router.back();  

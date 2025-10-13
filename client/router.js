@@ -10,6 +10,7 @@ import Confirm from './components/auth/Confirm.js'
 import Profile from './components/auth/Profile.js'
 import AllCollectionsPage from './components/collections/AllCollectionsPage.js';
 import AddUserToCollection from './components/collections/AddUserToCollection.js';
+import Settings from './components/collections/settings.js';
 
 const authRoutes = [
   { path: '/login', component: Login },
@@ -29,6 +30,7 @@ const collectionRoutes = [
   { path: '/details/:id/', component: Details },
   { path: '/', component: AllCollectionsPage },
   { path: '/add-user-to-collection/:collectionId', component: AddUserToCollection },
+  { path: '/settings/:collectionId', component: Settings },
 ]
 
 const utilityRoutes = [
