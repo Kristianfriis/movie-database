@@ -11,7 +11,7 @@ export default {
             <ion-back-button defaultHref="/" @click="goBack"></ion-back-button>
           </ion-buttons>
           <ion-title>Movies for {{ collectionInfo.name }}</ion-title>
-             <ion-buttons slot="secondary">
+             <ion-buttons slot="end">
             <ion-button @click="refreshMovies">
               <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
             </ion-button>
