@@ -22,15 +22,16 @@ export default {
         <ion-card-header>
           <ion-card-title>Users</ion-card-title>
         </ion-card-header>
-        <ion-card-content v-if="collectionInfo && collectionInfo.users">
-          <ion-list>
-            <ion-item-sliding>
-                <ion-item v-for="user in collectionInfo.users" :key="user.id">
-                {{ user.name }} - {{ user.currentRole }}
+        <ion-card-content>
+          <ion-list v-if="collectionInfo && collectionInfo.users">
+            <ion-item-sliding v-for="user in collectionInfo.users" :key="user.id">
+                <ion-item>
+                  <ion-label>{{ user.name }} - {{ user.currentRole }}</ion-label>
                 </ion-item>
-                 <ion-item-options v-if="collectionInfo.isMaintainer">
-                    <ion-item-option @click="OpenChangeRoleModal" color="primary">Change Role</ion-item-option>
-                    <ion-item-option color="danger" v-if="!collectionInfo.isMaintainer">Remove</ion-item-option>
+                
+                 <ion-item-options>
+                    <ion-item-option @click="OpenChangeRoleModal" color="primary">Role</ion-item-option>
+                    <ion-item-option color="danger">Remove</ion-item-option>
                 </ion-item-options>
             </ion-item-sliding>
           </ion-list>

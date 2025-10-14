@@ -180,16 +180,32 @@ public class SupabaseMovieRepository : IMovieRepository
         return newCollection.Id;
     }
 
-    public async Task AddMemberAsync(Guid collectionId, Guid userId, CollectionRole role)
+    public async Task<(bool success, string? error)> AddMemberAsync(Guid collectionId, Guid userId, CollectionRole role)
     {
-        var roleEntity = new UserCollectionRoleEntity
+        try
         {
-            UserId = userId,
-            CollectionId = collectionId,
-            Role = role.ToString().ToLower(),
-        };
+            var roleEntity = new UserCollectionRoleEntity
+            {
+                UserId = userId,
+                CollectionId = collectionId,
+                Role = role.ToString().ToLower(),
+            };
 
-        await _client.From<UserCollectionRoleEntity>().Insert(roleEntity);
+            var response = await _client.From<UserCollectionRoleEntity>().Insert(roleEntity);
+
+            return (true, null);
+
+        }
+        catch (System.Exception e)
+        {
+            if (e.Message.Contains("23503"))
+            {
+                return (false, "User not found");
+            }
+
+            return (false, e.Message);
+        }
+
     }
 
     public Task UpdateMemberRoleAsync(Guid collectionId, Guid userId, CollectionRole role)

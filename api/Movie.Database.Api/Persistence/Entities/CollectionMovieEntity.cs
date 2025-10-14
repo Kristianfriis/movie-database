@@ -6,7 +6,7 @@ namespace Movie.Database.Api.Persistence.Entities;
 [Table("collection_movies")]
 public class CollectionMovieEntity : BaseModel
 {
-    [PrimaryKey("id", false)]
+    [PrimaryKey("id")]
     public Guid Id { get; set; }
 
     [Column("collection_id")]

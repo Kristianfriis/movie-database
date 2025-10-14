@@ -7,7 +7,7 @@ namespace Movie.Database.Api.Persistence.Entities;
 [Table("user_collection_roles")]
 public class UserCollectionRoleEntity : BaseModel
 {
-    [PrimaryKey("id", false)]
+    [PrimaryKey("id")]
     public Guid Id { get; set; }
 
     [Column("user_id")]

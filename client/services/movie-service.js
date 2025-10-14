@@ -313,7 +313,7 @@ export const MovieService = {
   async addUserToCollection(collectionId, userId, role) {
     var requestBody = {
       collectionId,
-      userId,
+      UserIdToAdd : userId,
       role
     }
 
@@ -331,6 +331,23 @@ export const MovieService = {
     }
 
     return true;
+  },
+
+  /**
+   * Returns true if collection is in cache
+   * @param {string} collectionId 
+   * @returns {boolean}
+   */
+  collectionInCache(collectionId) {
+    if (!collectionId) {
+      return false;
+    }
+
+    if (this.moviesCache[collectionId]) {
+      return true;
+    }
+
+    return false;
   },
 
     /**

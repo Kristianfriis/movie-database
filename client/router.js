@@ -26,6 +26,7 @@ const profileRoutes = [
 
 const collectionRoutes = [
   { path: '/search/:collectionId', component: Search },
+  { path: '/search/:collectionId/:fromDetailsRoute', component: Search },
   { path: '/details/:id/:collectionId', component: Details },
   { path: '/details/:id/', component: Details },
   { path: '/', component: AllCollectionsPage },

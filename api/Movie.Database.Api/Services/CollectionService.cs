@@ -111,7 +111,11 @@ public class CollectionService : ICollectionService
 
         try
         {
-            await _repo.AddMemberAsync(collectionId, userIdToAdd, role);
+            var result = await _repo.AddMemberAsync(collectionId, userIdToAdd, role);
+
+            if (result.error is not null)
+                return (false, result.error);
+
             return (true, null);
         }
         catch (Exception ex)

@@ -77,21 +77,26 @@ export default {
   `,
   components: { IonSelect, IonSelectOption },
   data() {
-    return { 
-      query: '', 
-      results: [], 
-      movie: { title: '', year: '', format: 'DVD' }, 
-      collectionId: null, 
+    return {
+      query: '',
+      results: [],
+      movie: { title: '', year: '', format: 'DVD' },
+      collectionId: null,
       showModal: false,
       collectionInfo: { name: '', roleForCurrentUser: '', isMaintainer: false }
     }
   },
   async created() {
-    const loading = await loadingController.create({
-      message: 'Getting movies...',
-    });
+    var cachedCollection = MovieService.collectionInCache(this.collectionId);
 
-    loading.present();
+    let loading = null;
+    if (!cachedCollection) {
+      loading = await loadingController.create({
+        message: 'Getting movies...',
+      });
+
+      loading.present();
+    }
 
     const collectionId = this.$route.params.collectionId;
     if (collectionId) {
@@ -101,7 +106,9 @@ export default {
     this.collectionInfo = await MovieService.getCollectionInfo(collectionId);
     this.results = await MovieService.getAllMovies(collectionId);
 
-    loading.dismiss();
+    if (!cachedCollection) {
+      loading.dismiss();
+    }
   },
   mounted() {
     this.$refs.select.addEventListener('ionChange', (e) => {
@@ -127,7 +134,7 @@ export default {
       this.$router.push(`/settings/${this.collectionId}`);
     },
     goBack() {
-      this.$router.back();  
+      this.$router.back();
     },
     openModal() {
       this.showModal = true;
