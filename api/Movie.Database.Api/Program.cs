@@ -1,16 +1,11 @@
-using System.Security.Claims;
 using Scalar.AspNetCore;
 using Microsoft.IdentityModel.Tokens;
-using Supabase.Core;
 using Supabase;
 using Movie.Database.Api.Persistence;
-using Movie.Database.Api.Dtos;
-using Microsoft.AspNetCore.Mvc;
-using Movie.Database.Api.Extentions;
-using Movie.Database.Api.Models;
 using Movie.Database.Api.Endpoints;
 using Movie.Database.Api.Interfaces;
 using Movie.Database.Api.Services;
+using Movie.Database.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +38,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.ConfigureHttpJsonOptions(opts => {
     opts.SerializerOptions.IncludeFields = true;
     opts.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
@@ -64,6 +63,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMovieRepository, SupabaseMovieRepository>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -74,7 +75,11 @@ app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<CurrentUserMiddleware>();
+
 app.MapAuthEndpoints();
 app.MapMovieEndpoints();
+
+app.MapHealthChecks("/healthz");
 
 app.Run();
