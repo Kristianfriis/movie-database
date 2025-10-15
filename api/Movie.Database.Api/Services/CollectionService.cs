@@ -10,11 +10,14 @@ public class CollectionService : ICollectionService
 {
     private readonly IMovieRepository _repo;
     private readonly IConfiguration _config;
+    private readonly ICurrentUser _currentUser;
 
-    public CollectionService(IMovieRepository repo, IConfiguration config)
+
+    public CollectionService(IMovieRepository repo, IConfiguration config, ICurrentUser currentUser)
     {
         _repo = repo;
         _config = config;
+        _currentUser = currentUser;
     }
 
     public async Task<(string? token, string? error)> GenerateInviteAsync(Guid collectionId, Guid userId)
@@ -134,6 +137,48 @@ public class CollectionService : ICollectionService
             return (null, "Collection not found");
 
         return (exist, null);
+    }
+
+    public async Task<(bool success, string? error)> ChangeRoleForUserAsync(Guid collectionId, Guid userIdToChange, CollectionRole role)
+    {
+        if (userIdToChange == _currentUser.Id)
+            return (false, "Cannot change role for self");
+
+        if (!await _repo.IsMaintainerAsync(collectionId, _currentUser.Id))
+            return (false, "User is not a maintainer of the collection");
+
+        try
+        {
+            await _repo.UpdateMemberRoleAsync(collectionId, userIdToChange, role);
+            return (true, null);
+        }
+        catch(Exception e)
+        {
+            return (false, e.Message);
+        }
+    }
+
+    public async Task<(bool success, string? error)> RemoveMemberAsync(Guid collectionId, Guid userId)
+    {
+        if (!await _repo.IsMaintainerAsync(collectionId, _currentUser.Id))
+            return (false, "User is not a maintainer of the collection");
+            
+        try
+        {
+            var collectionMembers = await _repo.GetMembersForCollectionAsync(collectionId);
+
+            var numberOfMaintainers = collectionMembers.Count(m => m.Role == CollectionRole.Maintainer);
+
+            if (numberOfMaintainers == 1)
+                return (false, "Cannot remove last maintainer");
+
+            await _repo.RemoveMemberAsync(collectionId, userId);
+            return (true, null);
+        }
+        catch(Exception e)
+        {
+            return (false, e.Message);
+        }
     }
 }
 

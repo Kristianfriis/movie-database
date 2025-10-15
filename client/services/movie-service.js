@@ -313,7 +313,7 @@ export const MovieService = {
   async addUserToCollection(collectionId, userId, role) {
     var requestBody = {
       collectionId,
-      UserIdToAdd : userId,
+      UserIdToAdd: userId,
       role
     }
 
@@ -350,15 +350,15 @@ export const MovieService = {
     return false;
   },
 
-    /**
-   * Returns the collection info. Use forceRefresh to clear cache.
-   * @param {string} collectionId
-   * @param {boolean} forceRefresh
-   * @returns {Promise<CollectionInfo>}
-   */
+  /**
+ * Returns the collection info. Use forceRefresh to clear cache.
+ * @param {string} collectionId
+ * @param {boolean} forceRefresh
+ * @returns {Promise<CollectionInfo>}
+ */
   async getCollectionInfo(collectionId, forceRefresh = false) {
 
-      // return cached copy unless forceRefresh
+    // return cached copy unless forceRefresh
     if (!forceRefresh && this.collectionInfos && this.collectionInfos.length) {
       // return a shallow copy to avoid external mutation of cache
       var collectionToReturn = this.collectionInfos.find(c => c.id === collectionId);
@@ -375,7 +375,7 @@ export const MovieService = {
       }
     })
 
-    if(!response.ok) {
+    if (!response.ok) {
       return null;
     }
 
@@ -386,6 +386,54 @@ export const MovieService = {
     this.collectionInfos.push(result);
 
     return result;
+  },
+
+  async removeUserFromCollection(collectionId, userId) {
+    var requestBody = {
+      collectionId,
+      userId
+    }
+
+    var response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/removeMember', {
+      method: 'DELETE',
+      headers: {
+        ...await authHeaders(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+
+    if (!response.ok) {
+      var result = await response.json();
+      return { error: result.error, success: result.success };
+    }
+
+    return { error: null, success: true };
+  },
+
+  async changeRoleForUser(collectionId, userId, newRole) {
+    var requestBody = {
+      collectionId,
+      userIdToChange: userId,
+      role: newRole
+    }
+
+    var response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/changeRole', {
+      method: 'PUT',
+      headers: {
+        ...await authHeaders(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+
+    if (!response.ok) {
+      var result = await response.json();
+      return { error: result.error, success: result.success };
+    }
+
+    return { error: null, success: true };
+
   },
 
   getUserId() {

@@ -27,19 +27,19 @@ public static class MovieEndpoints
             return movie is null ? Results.NotFound() : Results.Ok(movie);
         }).Produces<MovieModel>(StatusCodes.Status200OK);
 
-        collections.MapGet("/{userId:guid}", async (Guid userId, IMovieRepository repo) =>
+        collections.MapGet("/{userId:guid}", async (Guid userId, [FromServices] IMovieRepository repo) =>
         {
             var collections = await repo.GetAvailableCollectionsAsync(userId);
 
             return Results.Ok(collections);
-        }).Produces<List<AvailableCollection>>();;
+        }).Produces<List<AvailableCollection>>(); ;
 
         collections.MapGet("/{collectionId:guid}/movies", async (Guid collectionId, IMovieRepository repo) =>
         {
             var movies = await repo.GetByCollectionAsync(collectionId);
 
             return Results.Ok(movies);
-        }).Produces<List<MovieModel>>();;
+        }).Produces<List<MovieModel>>(); ;
 
         collections.MapPost("/{collectionId:guid}/movies", async (Guid collectionId, CreateMovieRequest movie, IMovieRepository repo) =>
         {
@@ -86,7 +86,7 @@ public static class MovieEndpoints
 
             if (error is not null)
                 return Results.BadRequest(error);
-            
+
             return Results.Ok(new { key });
         }).Produces<string>();
 
@@ -110,10 +110,10 @@ public static class MovieEndpoints
 
             return Results.Ok();
         });
-        
-        collections.MapGet("/collectionInfo/{collectionId:guid}", async (Guid collectionId, ICollectionService collectionService, ClaimsPrincipal user, IUserRepository userRepo)  =>
+
+        collections.MapGet("/collectionInfo/{collectionId:guid}", async (Guid collectionId, ICollectionService collectionService, ClaimsPrincipal user, IUserRepository userRepo) =>
         {
-             var metaData = user.GetUserId();
+            var metaData = user.GetUserId();
 
             if (metaData is null)
                 return Results.Unauthorized();
@@ -148,6 +148,36 @@ public static class MovieEndpoints
 
             return Results.Ok(mappedResponse);
         }).Produces<CollectionInfoDto>();
-    
+
+        collections.MapPut("/{collectionId:guid}/changeRole", async ([FromBody] ChangeRoleRequest request, ICollectionService collectionService) =>
+        {
+            var (success, error) = await collectionService.ChangeRoleForUserAsync(request.CollectionId, request.UserIdToChange, (CollectionRole)request.Role);
+
+            var response = new DefaultResponse();
+            response.success = success;
+            response.error = error;
+
+            if (!success)
+                return Results.BadRequest(response);
+
+            return Results.Ok(response);
+
+        }).Produces<DefaultResponse>();
+
+        collections.MapDelete("/{collectionId:guid}/removeMember", async ([FromBody] RemoveUserFromCollectionRequest request, ICollectionService collectionService) =>
+        {
+            var (success, error) = await collectionService.RemoveMemberAsync(request.CollectionId, request.UserId);
+
+            var response = new DefaultResponse();
+            response.success = success;
+            response.error = error;
+
+            if (!success)
+                return Results.BadRequest(response);
+
+            return Results.Ok(response);
+
+        }).Produces<DefaultResponse>();
+
     }
 }

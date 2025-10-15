@@ -208,14 +208,36 @@ public class SupabaseMovieRepository : IMovieRepository
 
     }
 
-    public Task UpdateMemberRoleAsync(Guid collectionId, Guid userId, CollectionRole role)
+    public async Task<bool> UpdateMemberRoleAsync(Guid collectionId, Guid userId, CollectionRole role)
     {
-        throw new NotImplementedException();
+        var userRole = await _client
+            .From<UserCollectionRoleEntity>()
+            .Where(r => r.CollectionId == collectionId && r.UserId == userId)
+            .Single();
+
+        if (userRole is null)
+            return false;
+
+        userRole.Role = role.ToString().ToLower();
+
+        await _client.From<UserCollectionRoleEntity>().Update(userRole);
+
+        return true;
     }
 
-    public Task RemoveMemberAsync(Guid collectionId, Guid userId)
+    public async Task<bool> RemoveMemberAsync(Guid collectionId, Guid userId)
     {
-        throw new NotImplementedException();
+        var userRole = await _client
+            .From<UserCollectionRoleEntity>()
+            .Where(r => r.CollectionId == collectionId && r.UserId == userId)
+            .Single();
+
+        if (userRole is null)
+            return false;
+
+        await _client.From<UserCollectionRoleEntity>().Delete(userRole);
+
+        return true;
     }
 
     public async Task<bool> IsMaintainerAsync(Guid collectionId, Guid userId)
@@ -237,5 +259,39 @@ public class SupabaseMovieRepository : IMovieRepository
         }
 
         return false;
+    }
+
+    public async Task<List<CollectionMember>> GetMembersForCollectionAsync(Guid collectionId)
+    {
+        var roles = await _client
+            .From<UserCollectionRoleEntity>()
+            .Where(r => r.CollectionId == collectionId)
+            .Get();
+
+        var userIds = roles.Models.Select(r => r.UserId).Distinct().ToList();
+
+        if (!userIds.Any()) 
+            return new List<CollectionMember>();
+
+        var users = await _client
+            .From<UserEntity>()
+            .Filter("id", Constants.Operator.In, userIds)
+            .Get();
+
+        var result = new List<CollectionMember>();
+
+        return roles.Models.Select(r =>
+        {
+            var user = users.Models.FirstOrDefault(u => Guid.Parse(u.Id) == r.UserId);
+
+            var member = new CollectionMember
+            {
+                UserId = r.UserId,
+                Name = user?.Name ?? "Unknown",
+                Role = Enum.Parse<CollectionRole>(r.Role ?? "reader", true)
+            };
+
+            return member;
+        }).ToList();
     }
 }

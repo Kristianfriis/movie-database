@@ -10,7 +10,7 @@ export default {
             <ion-menu-button></ion-menu-button>
           </ion-buttons>
           <ion-title>Collections</ion-title>
-           <ion-buttons slot="secondary">
+           <ion-buttons slot="end">
             <ion-button @click="refreshCollections">
               <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
             </ion-button>

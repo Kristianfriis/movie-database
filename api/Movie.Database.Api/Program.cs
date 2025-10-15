@@ -6,6 +6,7 @@ using Movie.Database.Api.Endpoints;
 using Movie.Database.Api.Interfaces;
 using Movie.Database.Api.Services;
 using Movie.Database.Api.Middleware;
+using Movie.Database.Api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,8 +40,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICurrentUser, CurrentUserAccessor>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.ConfigureHttpJsonOptions(opts => {
     opts.SerializerOptions.IncludeFields = true;
@@ -62,6 +61,7 @@ builder.Services.AddScoped<Client>(sp =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMovieRepository, SupabaseMovieRepository>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 builder.Services.AddHealthChecks();
 

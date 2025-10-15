@@ -12,7 +12,8 @@ public interface IMovieRepository
     Task<List<AvailableCollection>> GetAvailableCollectionsAsync(Guid userId);
     Task<Guid> CreateCollectionAsync(string name, Guid ownerId);
     Task<(bool success, string? error)> AddMemberAsync(Guid collectionId, Guid userId, CollectionRole role);
-    Task UpdateMemberRoleAsync(Guid collectionId, Guid userId, CollectionRole role);
-    Task RemoveMemberAsync(Guid collectionId, Guid userId);
+    Task<bool> UpdateMemberRoleAsync(Guid collectionId, Guid userId, CollectionRole role);
+    Task<bool> RemoveMemberAsync(Guid collectionId, Guid userId);
     Task<bool> IsMaintainerAsync(Guid collectionId, Guid userId);
+    Task<List<CollectionMember>> GetMembersForCollectionAsync(Guid collectionId);
 }

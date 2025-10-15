@@ -4,7 +4,7 @@ namespace Movie.Database.Api.Interfaces;
 
 public interface ICurrentUser
 {
-    Guid Id { get; }
-    string? Email { get; }
-    string? Name { get; }
+    Guid Id { get; set; }
+    string? Email { get; set; }
+    string? Name { get; set; }
 }

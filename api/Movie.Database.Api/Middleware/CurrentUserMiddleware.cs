@@ -14,7 +14,7 @@ public class CurrentUserMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context, IUserRepository userRepo)
+    public async Task InvokeAsync(HttpContext context, ICurrentUser userContext, IUserRepository userRepo)
     {
         var principal = context.User;
         var path = context.Request.Path.Value;
@@ -26,14 +26,26 @@ public class CurrentUserMiddleware
             return;
         }
 
-
         if (principal?.Identity?.IsAuthenticated == true)
         {
-            var sub = principal.FindFirst("sub")?.Value;
 
-            if (!string.IsNullOrEmpty(sub))
+            var metadataClaim = principal.FindFirst("user_metadata")?.Value;
+            if (metadataClaim is null)
             {
-                var dbUser = await userRepo.GetUserByAuthId(sub);
+                await _next(context);
+                return;
+            }
+
+            var metadata = System.Text.Json.JsonSerializer.Deserialize<UserMetadata>(metadataClaim);
+            if (metadata is null)
+            {
+                await _next(context);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(metadata.sub))
+            {
+                var dbUser = await userRepo.GetUserByAuthId(metadata.sub);
 
                 if (dbUser != null)
                 {
@@ -46,6 +58,13 @@ public class CurrentUserMiddleware
 
                     // Store in HttpContext.Items for now
                     context.Items[nameof(ICurrentUser)] = currentUser;
+
+                    if (userContext is CurrentUser ctx)
+                    {
+                        ctx.Id = Guid.Parse(dbUser.Id);
+                        ctx.Email = dbUser.Email;
+                        ctx.Name = dbUser.Name;
+                    }
                 }
             }
         }
