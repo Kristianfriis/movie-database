@@ -80,6 +80,10 @@ export default {
     }
   },
   async mounted() {
+    this.$refs.select.addEventListener('ionChange', (e) => {
+      this.chosenUser.currentRole = e.detail.value;
+    });
+
     const collectionId = this.$route.params.collectionId;
     this.collectionId = collectionId;
 
@@ -89,6 +93,8 @@ export default {
   },
   methods: {
     closeModal() {
+      this.showModal = false;
+
       this.chosenUser = {
         id: '',
         name: '',
@@ -96,7 +102,6 @@ export default {
         role: ''
       };
 
-      this.showModal = false;
       this.$refs.options.closeSlidingItems();
     },
     goBack() {
@@ -120,7 +125,7 @@ export default {
       if (!user) {
         return;
       }
-      
+
       this.chosenUser.id = userId;
       this.chosenUser.name = user.name;
       this.chosenUser.currentRole = user.currentRole.toLowerCase();
@@ -132,9 +137,11 @@ export default {
         message: 'changing user role...',
       });
 
+      this.$refs.options.closeSlidingItems();
+
       loading.present();
 
-      var response = await MovieService.changeRoleForUser(this.collectionId, this.chosenUser.userId, this.chosenUser.currentRole);
+      var response = await MovieService.changeRoleForUser(this.collectionId, this.chosenUser.id, this.chosenUser.currentRole);
 
       loading.dismiss();
 
@@ -146,10 +153,13 @@ export default {
           color: "danger"
         });
 
+        this.closeModal();
+
         await toast.present();
+       
         return;
       }
-
+      
       await this.refreshCollectionInfo();
 
       const toast = await toastController.create({
@@ -158,10 +168,10 @@ export default {
         swipeGesture: "vertical",
         color: "success"
       });
+      
+      this.closeModal();
 
       await toast.present();
-
-      this.$refs.options.closeSlidingItems();
     },
     async presentRemoveUser(userId) {
 
