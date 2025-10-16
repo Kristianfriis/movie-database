@@ -436,6 +436,23 @@ export const MovieService = {
 
   },
 
+  async updateMovie(movie) {
+    const response = await fetch(window.appConfig.apiUrl + '/movies/' + movie.id, {  
+      method: 'PUT',
+        headers: {
+        ...await authHeaders(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(movie)
+    })
+
+    if (!response.ok) {
+      return null;
+    }
+
+    var responseJson = await response.json();
+  },
+
   getUserId() {
     var user = localStorage.getItem('user');
     if (!user) {
