@@ -7,6 +7,7 @@ using Movie.Database.Api.Interfaces;
 using Movie.Database.Api.Services;
 using Movie.Database.Api.Middleware;
 using Movie.Database.Api.Models;
+using Movie.Database.Api.External.MovieLookup;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,9 @@ builder.Services.AddScoped<Client>(sp =>
         AutoRefreshToken = true,
     });
 });
+
+builder.Services.Configure<MovieLookupOptions>(
+    builder.Configuration.GetSection(MovieLookupOptions.Position));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMovieRepository, SupabaseMovieRepository>();

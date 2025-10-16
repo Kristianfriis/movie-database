@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using Movie.Database.Api.Interfaces;
 using Movie.Database.Api.Models;
 using Movie.Database.Api.Persistence.Entities;
@@ -50,6 +51,10 @@ public class SupabaseMovieRepository : IMovieRepository
         {
             Id = movie.Id,
             Title = movie.Title,
+            Format = movie.Format.ToString().ToLower(),
+            Genres = JsonSerializer.Serialize(movie.Genre),
+            PosterUrl = movie.PosterUrl,
+            Overview = movie.Overview
         };
 
         var inserted = await _client.From<MovieEntity>().Insert(dbMovie);
@@ -57,6 +62,13 @@ public class SupabaseMovieRepository : IMovieRepository
         {
             throw new Exception("Failed to insert movie");
         }
+
+
+        var directorIds = await InsertPersonAsync(movie.Directors);
+        var castIds = await InsertPersonAsync(movie.Cast);
+
+        await LinkPersonsAndMovieAsync(directorIds, inserted.Model.Id, "director");
+        await LinkPersonsAndMovieAsync(castIds, inserted.Model.Id, "cast");
 
         var link = new CollectionMovieEntity
         {
@@ -67,6 +79,66 @@ public class SupabaseMovieRepository : IMovieRepository
         await _client.From<CollectionMovieEntity>().Insert(link);
 
         return inserted.Model.Id;
+    }
+
+    private async Task LinkPersonsAndMovieAsync(List<long> personIds, Guid id, string v)
+    {
+        var links = new List<MoviePersonEntity>();
+
+        personIds.ForEach(d =>
+        {
+            var link = new MoviePersonEntity
+            {
+                MovieId = id,
+                PersonId = d,
+                CreatedAt = DateTime.UtcNow,
+                Type = v
+            };
+
+            links.Add(link);
+        });
+
+        await _client.From<MoviePersonEntity>().Insert(links);
+    }
+
+    public async Task<List<long>> InsertPersonAsync(List<Person> people)
+    {
+        var result = new List<long>();
+
+        if (!people.Any()) return result;
+
+        var externalIds = people.Select(p => p.ExternalId).ToList();
+
+        var existing = await _client
+            .From<PersonEntity>()
+            .Filter("external_id", Constants.Operator.In, externalIds)
+            .Get();
+
+        result.AddRange(existing.Models.Select(p => p.Id).ToList());
+
+        var newPeople = people.Where(p => !existing.Models.Any(e => e.ExternalId == p.ExternalId)).ToList();
+
+        if (!newPeople.Any()) return result;
+
+        var newEntities = new List<PersonEntity>();
+
+        newPeople.ForEach(p =>
+        {
+            var newEntity = new PersonEntity
+            {
+                ExternalId = p.ExternalId,
+                Name = p.Name,
+            };
+
+            newEntities.Add(newEntity);
+        });
+
+
+        var inserted = await _client.From<PersonEntity>().Insert(newEntities);
+
+        result.AddRange(inserted.Models.Select(p => p.Id).ToList());
+
+        return result;
     }
 
     public async Task RemoveFromCollectionAsync(Guid collectionId, Guid movieId)
@@ -144,12 +216,30 @@ public class SupabaseMovieRepository : IMovieRepository
 
     private MovieModel MapToDomain(MovieEntity db)
     {
-        return new MovieModel
+        var movie = new MovieModel
         {
             Id = db.Id,
             Title = db.Title,
-            CreatedAt = db.CreatedAt
+            CreatedAt = db.CreatedAt ?? default,
+            PosterUrl = db.PosterUrl,
+            Overview = db.Overview,
         };
+
+        if (string.IsNullOrEmpty(db.Format))
+            movie.Format = MovieFormat.Unknown;
+        else
+        {
+            movie.Format = Enum.Parse<MovieFormat>(db.Format, true);
+        }
+
+        if (string.IsNullOrEmpty(db.Genres))
+            return movie;
+
+        var genres = JsonSerializer.Deserialize<List<Genre>>(db.Genres);
+
+        movie.Genre.AddRange(genres ?? new List<Genre>());
+
+        return movie;
     }
 
     public async Task<Guid> CreateCollectionAsync(string name, Guid ownerId)
@@ -270,7 +360,7 @@ public class SupabaseMovieRepository : IMovieRepository
 
         var userIds = roles.Models.Select(r => r.UserId).Distinct().ToList();
 
-        if (!userIds.Any()) 
+        if (!userIds.Any())
             return new List<CollectionMember>();
 
         var users = await _client
