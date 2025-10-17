@@ -16,4 +16,5 @@ public interface IMovieRepository
     Task<bool> RemoveMemberAsync(Guid collectionId, Guid userId);
     Task<bool> IsMaintainerAsync(Guid collectionId, Guid userId);
     Task<List<CollectionMember>> GetMembersForCollectionAsync(Guid collectionId);
+    Task<Guid> UpdateMovieAsync(MovieModel movie);
 }

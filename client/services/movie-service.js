@@ -55,6 +55,31 @@ export const MovieService = {
     return Promise.resolve(this.movies)
   },
 
+  /** 
+  *  @param {string} name
+  * @returns {Promise<Movie[]>}
+  */
+  async GetMovieById(id) {
+    const foundMovie = this.movies.find(m => m.id == id);
+    if (foundMovie) {
+      // Create a working copy for editing
+      return JSON.parse(JSON.stringify(foundMovie));
+    }
+
+    var response = await fetch(window.appConfig.apiUrl + '/movies/' + id, {
+      headers: {
+        ...await authHeaders(),
+      }
+    
+    })
+
+    if(!response.ok){
+      return null;
+    }
+
+    return await response.json();
+  },
+
   /**
  * @returns {Promise<Collection[]>}
  */
@@ -437,9 +462,9 @@ export const MovieService = {
   },
 
   async updateMovie(movie) {
-    const response = await fetch(window.appConfig.apiUrl + '/movies/' + movie.id, {  
+    const response = await fetch(window.appConfig.apiUrl + '/movies/' + movie.id, {
       method: 'PUT',
-        headers: {
+      headers: {
         ...await authHeaders(),
         'Content-Type': 'application/json'
       },
@@ -451,6 +476,8 @@ export const MovieService = {
     }
 
     var responseJson = await response.json();
+
+    return responseJson;
   },
 
   getUserId() {

@@ -18,7 +18,7 @@ public class MovieModel
 public enum MovieFormat
 {
     DVD,
-    BluRay,
+    Bluray,
     Digital,
     Unknown,
 }

@@ -384,4 +384,27 @@ public class SupabaseMovieRepository : IMovieRepository
             return member;
         }).ToList();
     }
+
+    public async Task<Guid> UpdateMovieAsync(MovieModel movie)
+    {
+        var dbMovie = await _client
+            .From<MovieEntity>()
+            .Where(m => m.Id == movie.Id)
+            .Single();
+
+        if (dbMovie is null)
+        {
+            throw new Exception("Movie not found");
+        }
+
+        dbMovie.Title = movie.Title;
+        dbMovie.Format = movie.Format.ToString().ToLower();
+        dbMovie.Genres = JsonSerializer.Serialize(movie.Genre);
+        dbMovie.PosterUrl = movie.PosterUrl;
+        dbMovie.Overview = movie.Overview;
+    
+        await _client.From<MovieEntity>().Update(dbMovie);
+
+        return dbMovie.Id;
+    }
 }

@@ -1,5 +1,6 @@
 import { MovieService } from '../services/movie-service.js'
 import { store } from '../services/state.js'
+import { loadingController, toastController } from '@ionic/core';
 
 export default {
   template: /*html*/`
@@ -25,10 +26,13 @@ export default {
 
         <ion-item>
           <ion-label position="stacked">Format</ion-label>
-          <ion-select v-model="movie.format" placeholder="Select Format" ref="formatSelect">
-            <ion-select-option value="dvd">DVD</ion-select-option>
-            <ion-select-option value="BluRay">Blu-ray</ion-select-option>
-            <ion-select-option value="digital">Digital</ion-select-option>
+          <ion-select v-model="movie.format" placeholder="Select Format" ref="formatSelect">  
+          <ion-select-option 
+            v-for="formatName in store.formats" 
+            :key="formatName" 
+            :value="formatName"
+            >
+            {{formatName}}</ion-select-option>
           </ion-select>
         </ion-item>
 
@@ -41,7 +45,7 @@ export default {
             ref="genreSelect"
           >
             <ion-select-option 
-              v-for="genreName in availableGenres" 
+              v-for="genreName in store.genres" 
               :key="genreName" 
               :value="genreName"
             >
@@ -64,34 +68,18 @@ export default {
         title: '',
         format: '',
         overview: '',
-        genres: []
       },
-      store: store,
-      availableGenres: [
-        'Action', 'Adventure', 'Animation', 'Comedy', 'Crime',
-        'Documentary', 'Drama', 'Family', 'Fantasy', 'History',
-        'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction',
-        'TV Movie', 'Thriller', 'War', 'Western'
-      ]
+      store: store
     }
   },
 
-  created() {
+  async created() {
     const id = this.$route.params.id;
 
-    // NOTE: This getAll() call should ideally be changed to a getById(id) call
-    // for efficiency in a real application, especially if you have many movies.
-    MovieService.getAll().then(movies => {
-      // Find the movie and assign a deep copy to `this.movie`
-      // This prevents editing the reactive state directly before saving
-      const foundMovie = movies.find(m => m.id == id);
-      if (foundMovie) {
-        // Create a working copy for editing
-        this.movie = JSON.parse(JSON.stringify(foundMovie));
-      }
-    });
-
-    this.store.showBackButton = true
+    var foundMovie = await MovieService.GetMovieById(id)
+    if (foundMovie !== null) {
+      this.movie = foundMovie;
+    }
   },
   mounted() {
     this.$refs.formatSelect.addEventListener('ionChange', (e) => {
@@ -99,7 +87,7 @@ export default {
     });
 
     this.$refs.genreSelect.addEventListener('ionChange', (e) => {
-      this.movie.genres = e.detail.value;
+      this.movie.genre = e.detail.value;
     });
   },
   methods: {
@@ -114,23 +102,53 @@ export default {
           title: this.movie.title,
           format: this.movie.format,
           overview: this.movie.overview,
-          genres: JSON.stringify(this.movie.genres),
+          genre: this.movie.genre,
           // Only send fields that are editable or necessary for the update
         };
 
-        // Assuming MovieService has an update method that takes the movie object
-        //await MovieService.update(movieToUpdate); 
-        console.log(movieToUpdate)
+        const loading = await loadingController.create({
+          message: `Updating ${this.movie.title}...`,
+        });
 
-        // alert('Movie updated successfully!');
-        alert('Update movie not implemented.');
+        loading.present();
 
-        // Optional: Navigate back or update the global store state
+        var id = await MovieService.updateMovie(movieToUpdate);
+
+        loading.dismiss();
+
+        if (id === null) {
+          const toast = await toastController.create({
+            message: 'Error updating movie.',
+            duration: 1500,
+            swipeGesture: "vertical",
+            color: "danger"
+          });
+
+          await toast.present();
+
+          return;
+        }
+
+        const toast = await toastController.create({
+          message: 'Movie updated successfully',
+          duration: 1500,
+          swipeGesture: "vertical",
+          color: "success"
+        });
+
+        await toast.present();
+
         this.goBack();
 
       } catch (error) {
-        console.error('Failed to update movie:', error);
-        alert('Error updating movie. Check console for details.');
+        const toast = await toastController.create({
+          message: `Error updating movie. ${error}`,
+          duration: 1500,
+          swipeGesture: "vertical",
+          color: "danger"
+        });
+
+        await toast.present();
       }
     }
   }

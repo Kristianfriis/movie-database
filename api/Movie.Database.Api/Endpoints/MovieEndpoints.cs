@@ -21,11 +21,29 @@ public static class MovieEndpoints
             .WithTags("Collections")
             .RequireAuthorization();
 
-        movies.MapGet("/{id:guid}", async (Guid id, IMovieRepository repo) =>
+        movies.MapGet("/{id:guid}", async (Guid id, IMovieService movieService) =>
         {
-            var movie = await repo.GetByIdAsync(id);
-            return movie is null ? Results.NotFound() : Results.Ok(movie);
+            var (success, error, movie) = await movieService.GetMovieAsync(id);
+
+            if (!success)
+                return Results.BadRequest(error);
+
+            if (movie is null)
+                return Results.NotFound();
+
+            return Results.Ok(movie);
         }).Produces<MovieModel>(StatusCodes.Status200OK);
+
+        movies.MapPut("/{id:guid}", async (Guid id, [FromBody] MovieModel movie, IMovieService movieService) =>
+        {
+            var (success, error, updatedId) = await movieService.UpdateMovieAsync(movie);
+
+            if (!success)
+                return Results.BadRequest(error);
+
+            return Results.Ok(updatedId);
+
+        }).Produces<Guid>(StatusCodes.Status200OK);
 
         collections.MapGet("/{userId:guid}", async (Guid userId, [FromServices] IMovieRepository repo) =>
         {
@@ -178,6 +196,5 @@ public static class MovieEndpoints
             return Results.Ok(response);
 
         }).Produces<DefaultResponse>();
-
     }
 }

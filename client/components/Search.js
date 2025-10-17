@@ -1,4 +1,5 @@
 import { MovieService } from '../services/movie-service.js'
+import { store } from '../services/state.js'
 import { loadingController, toastController } from '@ionic/core';
 import { IonSelect, IonSelectOption } from '@ionic/ionicvue';
 
@@ -61,10 +62,13 @@ export default {
               <ion-input v-model="movie.title" placeholder="Title"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-select v-model="movie.format" placeholder="Format" ref="select">
-                <ion-select-option value="DVD">DVD</ion-select-option>
-                <ion-select-option value="BluRay">BluRay</ion-select-option>
-                <ion-select-option value="Digital">Digital</ion-select-option>
+              <ion-select v-model="movie.format" placeholder="Select Format" ref="formatSelect">  
+                <ion-select-option 
+                v-for="formatName in store.formats" 
+                :key="formatName" 
+                :value="formatName"
+                >
+                {{formatName}}</ion-select-option>
               </ion-select>
             </ion-item>
       </ion-list>
@@ -78,6 +82,7 @@ export default {
   components: { IonSelect, IonSelectOption },
   data() {
     return {
+      store: store,
       query: '',
       results: [],
       movie: { title: '', year: '', format: 'DVD' },
@@ -111,7 +116,7 @@ export default {
     }
   },
   mounted() {
-    this.$refs.select.addEventListener('ionChange', (e) => {
+    this.$refs.formatSelect.addEventListener('ionChange', (e) => {
       this.movie.format = e.detail.value;
     });
   },
@@ -126,7 +131,7 @@ export default {
 
       loading.present();
 
-      this.results = await MovieService.getAllMovies(this.collectionId);
+      this.results = await MovieService.getAllMovies(this.collectionId, true);
 
       loading.dismiss()
     },
