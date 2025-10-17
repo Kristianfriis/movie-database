@@ -67,6 +67,7 @@ builder.Services.AddScoped<IMovieRepository, SupabaseMovieRepository>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IMovieService, MovieService>();
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
 builder.Services.AddHealthChecks();
 
@@ -84,6 +85,7 @@ app.UseMiddleware<CurrentUserMiddleware>();
 
 app.MapAuthEndpoints();
 app.MapMovieEndpoints();
+app.MapPersonEndpoints();
 
 app.MapHealthChecks("/healthz");
 

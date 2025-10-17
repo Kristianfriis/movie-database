@@ -98,7 +98,7 @@ export default {
             this.showModal = false;
         },
         goBack() {
-            this.$router.back(); 
+            this.$router.back();
         },
         search() {
             const q = (this.searchQuery || '').toLowerCase();
@@ -168,6 +168,15 @@ export default {
             await toast.present();
 
             this.closeModal();
+        }
+    },
+    beforeRouteLeave(to, from, next) {
+        if (this.showModal) {
+            this.closeModal();
+            // Prevent navigation
+            next(false);
+        } else {
+            next();
         }
     }
 }

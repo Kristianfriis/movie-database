@@ -233,5 +233,14 @@ export default {
 
       this.$refs.options.closeSlidingItems();
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    if (this.showModal) {
+      this.closeModal();
+      // Prevent navigation
+      next(false);
+    } else {
+      next();
+    }
   }
 }

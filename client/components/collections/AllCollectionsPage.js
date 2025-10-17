@@ -143,5 +143,14 @@ export default {
 
       loading.dismiss();
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    if (this.showModal) {
+      this.closeModal();
+      // Prevent navigation
+      next(false);
+    } else {
+      next();
+    }
   }
 }
