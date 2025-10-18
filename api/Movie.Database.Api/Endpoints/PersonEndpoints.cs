@@ -1,5 +1,7 @@
 using System;
+using Microsoft.AspNetCore.Mvc;
 using Movie.Database.Api.Interfaces;
+using Movie.Database.Api.Models;
 
 namespace Movie.Database.Api.Endpoints;
 
@@ -22,5 +24,19 @@ public static class PersonEndpoints
 
             return Results.Ok(people);
         });
+
+        people.MapPost("/", async ([FromBody] Person person, [FromServices] IPersonRepository repo) =>
+        {
+            var result = await repo.CreatePerson(person);
+
+            return Results.Ok(result);
+        }).Produces<Person>();
+
+        people.MapPut("/", async ([FromBody] Person person, [FromServices] IPersonRepository repo) =>
+        {
+            var result = await repo.UpdatePerson(person);
+
+            return Results.Ok(result);
+        }).Produces<Person>();
     }
 }

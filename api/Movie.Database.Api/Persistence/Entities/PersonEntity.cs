@@ -14,5 +14,5 @@ public class PersonEntity : BaseModel
     [Column("external_id")]
     public long ExternalId { get; set; }
     [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 }

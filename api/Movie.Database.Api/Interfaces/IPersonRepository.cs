@@ -5,4 +5,6 @@ namespace Movie.Database.Api.Interfaces;
 public interface IPersonRepository
 {
     Task<List<Person>> SearchPeopleAsync(string query);
+    Task<Person> CreatePerson(Person person);
+    Task<Person> UpdatePerson(Person person);
 }

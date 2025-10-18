@@ -47,6 +47,7 @@ export const MovieService = {
 
   /** currently loaded collectionInfos */
   collectionInfos: [],
+  newMovieCache: [],
 
   /**
  * @returns {Promise<Movie[]>}
@@ -60,7 +61,7 @@ export const MovieService = {
   * @returns {Promise<Movie[]>}
   */
   async GetMovieById(id) {
-    const foundMovie = this.movies.find(m => m.id == id);
+    const foundMovie = this.newMovieCache.find(m => m.id == id);
     if (foundMovie) {
       // Create a working copy for editing
       return JSON.parse(JSON.stringify(foundMovie));
@@ -77,7 +78,9 @@ export const MovieService = {
       return null;
     }
 
-    return await response.json();
+    var movie = await response.json();
+    this.newMovieCache.push(movie);
+    return movie;
   },
 
   /**
@@ -239,6 +242,7 @@ export const MovieService = {
       this.movies = [...this.moviesCache[collectionId]];
       return Promise.resolve(this.movies);
     }
+    this.newMovieCache = [];
 
     const response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/movies', {
       headers: {

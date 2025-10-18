@@ -3,6 +3,7 @@ using System.Text.Json;
 using Movie.Database.Api.Interfaces;
 using Movie.Database.Api.Models;
 using Movie.Database.Api.Persistence.Entities;
+using Movie.Database.Api.Persistence.Mappers;
 using Supabase.Postgrest;
 
 namespace Movie.Database.Api.Persistence;
@@ -10,6 +11,9 @@ namespace Movie.Database.Api.Persistence;
 public class SupabaseMovieRepository : IMovieRepository
 {
     private readonly Supabase.Client _client;
+    private const string Director = "director";
+    private const string Cast = "cast";
+
 
     public SupabaseMovieRepository(Supabase.Client client)
     {
@@ -23,7 +27,33 @@ public class SupabaseMovieRepository : IMovieRepository
             .Where(m => m.Id == id)
             .Single();
 
-        return result == null ? null : MapToDomain(result);
+        if (result is null) 
+            return null;
+
+        var moviePersonsEntities = await _client
+            .From<MoviePersonEntity>()
+            .Where(m => m.MovieId == id)
+            .Get();
+
+        var directors = moviePersonsEntities.Models.Where(m => m.Type == Director).ToList();
+        var cast = moviePersonsEntities.Models.Where(m => m.Type == Cast).ToList();
+
+        var directorsEntities = await _client
+            .From<PersonEntity>()
+            .Filter("id", Constants.Operator.In, directors.Select(m => m.PersonId).ToList())
+            .Get();
+
+        var castEntities = await _client
+            .From<PersonEntity>()
+            .Filter("id", Constants.Operator.In, cast.Select(m => m.PersonId).ToList())
+            .Get();
+        
+        var movie = MapToDomain(result);
+
+        movie.Directors.AddRange(directorsEntities.Models.Select(PersonMapper.MapToDomain).ToList());
+        movie.Cast.AddRange(castEntities.Models.Select(PersonMapper.MapToDomain).ToList());
+
+        return movie;
     }
 
     public async Task<List<MovieModel>> GetByCollectionAsync(Guid collectionId)
@@ -67,8 +97,8 @@ public class SupabaseMovieRepository : IMovieRepository
         var directorIds = await InsertPersonAsync(movie.Directors);
         var castIds = await InsertPersonAsync(movie.Cast);
 
-        await LinkPersonsAndMovieAsync(directorIds, inserted.Model.Id, "director");
-        await LinkPersonsAndMovieAsync(castIds, inserted.Model.Id, "cast");
+        await LinkPersonsAndMovieAsync(directorIds, inserted.Model.Id, Director);
+        await LinkPersonsAndMovieAsync(castIds, inserted.Model.Id, Cast);
 
         var link = new CollectionMovieEntity
         {
@@ -402,9 +432,59 @@ public class SupabaseMovieRepository : IMovieRepository
         dbMovie.Genres = JsonSerializer.Serialize(movie.Genre);
         dbMovie.PosterUrl = movie.PosterUrl;
         dbMovie.Overview = movie.Overview;
-    
+
         await _client.From<MovieEntity>().Update(dbMovie);
+        await UpdateMoviePersons(dbMovie.Id, movie.Directors, Director);
+        await UpdateMoviePersons(dbMovie.Id, movie.Cast, Cast);
 
         return dbMovie.Id;
+    }
+
+    private async Task UpdateMoviePersons(Guid movieId, List<Person> persons, string type)
+    {
+        var existing = await _client
+            .From<MoviePersonEntity>()
+            .Where(p => p.MovieId == movieId && p.Type == type)
+            .Get();
+
+        var existingRelationships = existing.Models;
+
+        var incomingPersonIds = persons.Select(p => p.Id).ToList();
+
+        var relationshipsToDelete = existingRelationships
+            .Where(rel => !incomingPersonIds.Contains(rel.PersonId))
+            .ToList();
+
+        if (relationshipsToDelete.Any())
+        {
+            var deleteIds = relationshipsToDelete.Select(r => r.Id).ToList();
+
+            await _client
+                .From<MoviePersonEntity>()
+                .Filter("id", Constants.Operator.In, deleteIds)
+                .Delete();
+        }
+
+        var existingPersonIds = existingRelationships
+            .Select(rel => rel.PersonId)
+            .ToHashSet();
+
+        var personsToLink = persons
+            .Where(p => !existingPersonIds.Contains(p.Id))
+            .ToList();
+
+        if (personsToLink.Any())
+        {
+            var newRelationships = personsToLink.Select(p => new MoviePersonEntity
+            {
+                MovieId = movieId,
+                PersonId = p.Id,
+                Type = type
+            }).ToList();
+
+            await _client
+                .From<MoviePersonEntity>()
+                .Insert(newRelationships);
+        }
     }
 }

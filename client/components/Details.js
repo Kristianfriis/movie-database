@@ -159,12 +159,20 @@ export default {
   },
 
   async created() {
+    const loading = await loadingController.create({
+      message: 'Getting details...',
+    });
+
+    await loading.present();
+
     const id = this.$route.params.id;
 
     var foundMovie = await MovieService.GetMovieById(id)
     if (foundMovie !== null) {
       this.movie = foundMovie;
     }
+
+    loading.dismiss();
   },
   mounted() {
     this.$refs.formatSelect.addEventListener('ionChange', (e) => {
@@ -193,16 +201,16 @@ export default {
       this.openModal();
     },
     search() {
-        // Clear the previous timeout if the user typed another character quickly
-        if (this.debounceTimeout) {
-            clearTimeout(this.debounceTimeout);
-        }
+      // Clear the previous timeout if the user typed another character quickly
+      if (this.debounceTimeout) {
+        clearTimeout(this.debounceTimeout);
+      }
 
-        // Set a new timeout (e.g., 400 milliseconds)
-        this.debounceTimeout = setTimeout(() => {
-            // Call the actual search implementation
-            this.executeSearch();
-        }, 400); // Debounce time in milliseconds
+      // Set a new timeout (e.g., 400 milliseconds)
+      this.debounceTimeout = setTimeout(() => {
+        // Call the actual search implementation
+        this.executeSearch();
+      }, 400); // Debounce time in milliseconds
     },
     async executeSearch() {
       if (this.searchQuery.length < 3) {
@@ -267,6 +275,8 @@ export default {
           format: this.movie.format,
           overview: this.movie.overview,
           genre: this.movie.genre,
+          directors: this.movie.directors,
+          cast: this.movie.cast,
           // Only send fields that are editable or necessary for the update
         };
 
