@@ -36,10 +36,13 @@ public static class GenreIdTranslator
     /// </summary>
     /// <param name="externalId">The ID from the external API.</param>
     /// <returns>The corresponding internal Genre enum value.</returns>
-    public static Genre ConvertToInternalGenre(int externalId)
+    public static Genre ConvertToInternalGenre(this int? externalId)
     {
+        if(externalId is null)
+            return Genre.Unknown;
+
         // Try to find the internal ID in the map
-        if (ExternalToInternalMap.TryGetValue(externalId, out int internalId))
+        if (ExternalToInternalMap.TryGetValue(externalId.Value, out int internalId))
         {
             // Cast the internal ID to the Genre enum
             return (Genre)internalId;

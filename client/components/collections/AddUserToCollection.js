@@ -13,7 +13,7 @@ export default {
           <ion-title>Add User</ion-title>
         </ion-toolbar>
       </ion-header>
-
+<ion-content> 
     <ion-list>
         <ion-item>
           <ion-input v-model="searchQuery" @input="search" placeholder="Search email or name..."></ion-input>
@@ -23,7 +23,7 @@ export default {
         </ion-item>
       </ion-list>
     </ion-page>
-
+</ion-content> 
        <ion-modal :is-open="showModal" @didDismiss="closeModal">
           <ion-header>
             <ion-toolbar>

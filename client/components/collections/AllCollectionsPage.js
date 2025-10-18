@@ -17,6 +17,7 @@ export default {
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
+      <ion-content> 
       <ion-button expand="block" @click="openModal" v-if="collections.length === 0 && !loading">
         Add New Collection
       </ion-button>
@@ -30,6 +31,7 @@ export default {
           </ion-label>
         </ion-item>
       </ion-list>
+      </ion-content> 
 
       <ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="collections.length !== 0">
       <ion-fab-button>

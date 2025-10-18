@@ -84,7 +84,8 @@ public class SupabaseMovieRepository : IMovieRepository
             Format = movie.Format.ToString().ToLower(),
             Genres = JsonSerializer.Serialize(movie.Genre),
             PosterUrl = movie.PosterUrl,
-            Overview = movie.Overview
+            Overview = movie.Overview,
+            CreatedAt = DateTime.UtcNow,
         };
 
         var inserted = await _client.From<MovieEntity>().Insert(dbMovie);
@@ -479,7 +480,8 @@ public class SupabaseMovieRepository : IMovieRepository
             {
                 MovieId = movieId,
                 PersonId = p.Id,
-                Type = type
+                Type = type,
+                CreatedAt = DateTime.UtcNow
             }).ToList();
 
             await _client

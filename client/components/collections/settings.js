@@ -18,7 +18,7 @@ export default {
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-
+    <ion-content> 
       <ion-card>
         <ion-card-header>
           <ion-card-title>Users</ion-card-title>
@@ -40,6 +40,7 @@ export default {
       </ion-card>
       </ion-page>
       <ion-alert header="Are you sure?" ref="alert"></ion-alert>
+      </ion-content>
 
         <ion-modal :is-open="showModal" @didDismiss="closeModal">
           <ion-header>
@@ -156,10 +157,10 @@ export default {
         this.closeModal();
 
         await toast.present();
-       
+
         return;
       }
-      
+
       await this.refreshCollectionInfo();
 
       const toast = await toastController.create({
@@ -168,7 +169,7 @@ export default {
         swipeGesture: "vertical",
         color: "success"
       });
-      
+
       this.closeModal();
 
       await toast.present();

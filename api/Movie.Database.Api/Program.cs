@@ -68,6 +68,7 @@ builder.Services.AddScoped<ICollectionService, CollectionService>();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IMovieService, MovieService>();
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+builder.Services.AddSingleton<IMovieLookup, TmdbClient>();
 
 builder.Services.AddHealthChecks();
 

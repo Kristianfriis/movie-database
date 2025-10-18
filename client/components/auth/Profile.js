@@ -96,7 +96,7 @@ export default {
           <ion-title>Profile</ion-title>
         </ion-toolbar>
       </ion-header>
-
+<ion-content> 
           <ion-card>
             <ion-card-header>
                 <ion-card-title v-if="createProfile">Create Profile</ion-card-title>
@@ -115,6 +115,7 @@ export default {
                 <ion-button expand="block" @click="updateProflile" v-else>Update</ion-button>
             </ion-card-content>
           </ion-card>
+          </ion-content> 
     </ion-page>
     `
 }

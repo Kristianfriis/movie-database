@@ -19,7 +19,7 @@ export default {
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-        
+        <ion-content>
         <ion-item>
           <ion-label position="stacked">Title</ion-label>
           <ion-input v-model="movie.title" type="text" placeholder="Enter movie title"></ion-input>
@@ -105,6 +105,10 @@ export default {
     </ion-button>
   </ion-card-content>
 </ion-card>
+<ion-item>
+
+</ion-item>
+</ion-content>
 
  <ion-modal :is-open="showModal" @didDismiss="closeModal">
           <ion-header>

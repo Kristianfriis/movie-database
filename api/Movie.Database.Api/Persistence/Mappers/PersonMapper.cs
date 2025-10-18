@@ -24,7 +24,8 @@ public static class PersonMapper
         {
             Id = person.Id,
             Name = person.Name,
-            ExternalId = person.ExternalId
+            ExternalId = person.ExternalId,
+            CreatedAt = DateTime.UtcNow
         };
 
         return result;

@@ -14,7 +14,7 @@ public class MoviePersonEntity : BaseModel
     [Column("person_id")]
     public long PersonId { get; set; }
     [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     [Column("type")]
     public string? Type { get; set; }

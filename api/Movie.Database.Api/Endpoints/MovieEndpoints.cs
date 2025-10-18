@@ -59,7 +59,7 @@ public static class MovieEndpoints
             return Results.Ok(movies);
         }).Produces<List<MovieModel>>(); ;
 
-        collections.MapPost("/{collectionId:guid}/movies", async (Guid collectionId, CreateMovieRequest movie, IMovieRepository repo) =>
+        collections.MapPost("/{collectionId:guid}/movies", async (Guid collectionId, CreateMovieRequest movie, IMovieService movieService) =>
         {
             var movieModel = new MovieModel
             {
@@ -67,12 +67,25 @@ public static class MovieEndpoints
                 Format = (MovieFormat)movie.Format
             };
 
-            var id = await repo.AddToCollectionAsync(collectionId, movieModel);
+            var result = await movieService.AddToCollectionAsync(collectionId, movieModel);
 
-            movieModel.Id = id;
+            var response = new AddMovieResponse
+            {
+                Movies = result.movies,
+                NeedMoreInfo = result.needmoreinfo,
+            };
 
-            return Results.Created($"/movies/{movieModel.Id}", movieModel);
-        }).Produces<MovieModel>(StatusCodes.Status201Created);
+            if (!string.IsNullOrEmpty(response.Error))
+            {
+                response.Error = result.error;
+                response.Success = false;
+                
+                return Results.BadRequest(response);
+            }
+
+
+            return Results.Created($"", response);
+        }).Produces<AddMovieResponse>(StatusCodes.Status201Created);
 
         collections.MapDelete("/{collectionId:guid}/movies/{movieId:guid}", async (Guid collectionId, Guid movieId, IMovieRepository repo) =>
         {

@@ -18,4 +18,5 @@ export const store = reactive({
   formats: [
     'DVD', 'Bluray', 'Digital', 'Unknown'
   ],
+  movieSelectList: []
 })

@@ -36,7 +36,7 @@ export default {
       </ion-fab-button>
     </ion-fab-list>
     </ion-fab>
-
+ <ion-content>
       <ion-list>
         <ion-item>
           <ion-input v-model="query" @input="search" placeholder="Search..."></ion-input>
@@ -45,7 +45,7 @@ export default {
             {{ movie.title }} - {{ movie.format }}
         </ion-item>
       </ion-list>
-
+ </ion-content>
        <ion-modal :is-open="showModal" @didDismiss="closeModal">
           <ion-header>
             <ion-toolbar>
@@ -172,16 +172,27 @@ export default {
 
       loading.present();
 
-      var newMovie = await MovieService.add(this.movie, this.collectionId);
+      var newMovieResponse = await MovieService.add(this.movie, this.collectionId);
+      if(newMovieResponse.redirectToMovieSelector){
+        this.$router.push(`/movies-selector/${this.collectionId}`);
+        return;
+      }
 
       loading.dismiss();
+
       this.movie = { title: '', format: 'DVD' };
       this.query = '';
 
       this.results.push(newMovie);
 
+      var toastMessage = `${this.movie.title} added.`;
+
+      if (newMovieResponse.showAddDetailsMessage) {
+        toastMessage = `${this.movie.title} added. But need more details`;
+      }
+
       const toast = await toastController.create({
-        message: `${this.movie.title} added.`,
+        message: toastMessage,
         duration: 1500,
         swipeGesture: "vertical",
         color: "success"

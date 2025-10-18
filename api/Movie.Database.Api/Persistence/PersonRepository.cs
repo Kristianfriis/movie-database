@@ -36,6 +36,32 @@ public class PersonRepository : IPersonRepository
         return PersonMapper.MapToDomain(inserted.Model);
     }
 
+    public async Task<List<Person>> CreatePersons(List<Person> persons)
+    {
+        var existingPersons = new List<Person>();
+
+        foreach (var person in persons)
+        {
+            existingPersons.AddRange(await SearchPeopleAsync(person.Name ?? ""));
+        }
+
+        var personsToCreate = persons.Where(p => !existingPersons.Any(e => e.Name == p.Name)).ToList();
+
+        if (personsToCreate.Any())
+        {
+            var inserted = await _client
+                .From<PersonEntity>()
+                .Insert(personsToCreate.Select(PersonMapper.MapToEntity).ToList());
+
+            if (inserted is null)
+                throw new Exception("Failed to insert persons");
+
+            existingPersons.AddRange(inserted.Models.Select(PersonMapper.MapToDomain).ToList());
+        }
+
+        return existingPersons;
+    }
+
     public async Task<List<Person>> SearchPeopleAsync(string query)
     {
         var dbResult = await _client

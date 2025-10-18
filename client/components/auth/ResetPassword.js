@@ -34,6 +34,7 @@ export default {
           <ion-title>Reset Password</ion-title>
         </ion-toolbar>
       </ion-header>
+      <ion-content> 
         <ion-card>
           <ion-card-content>
             <ion-input label="Email" v-model="email" type="email" />
@@ -42,7 +43,7 @@ export default {
             <ion-text color="danger" v-if="error">{{ error }}</ion-text>
           </ion-card-content>
         </ion-card>
-
+</ion-content> 
     </ion-page>
   `
 }

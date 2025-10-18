@@ -47,7 +47,7 @@ export default {
           <ion-title>Login</ion-title>
         </ion-toolbar>
       </ion-header>
-
+<ion-content> 
     <ion-card>
       <ion-card-content>
         <ion-input label="Email" v-model="email" type="email" />
@@ -69,6 +69,7 @@ export default {
         </div>
       </ion-card-content>
     </ion-card>
+    </ion-content> 
 </ion-page>
 
   `

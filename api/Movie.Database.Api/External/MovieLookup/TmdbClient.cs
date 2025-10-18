@@ -1,7 +1,10 @@
 using System;
 using System.Net;
+using Flurl;
+using Flurl.Http;
 using Microsoft.Extensions.Options;
 using Movie.Database.Api.External.MovieLookup.Models;
+using Movie.Database.Api.Interfaces;
 using Movie.Database.Api.Models;
 
 namespace Movie.Database.Api.External.MovieLookup;
@@ -9,12 +12,14 @@ namespace Movie.Database.Api.External.MovieLookup;
 public class TmdbClient : IMovieLookup
 {
     private readonly HttpClient _client;
-
+    private readonly MovieLookupOptions _settings;
     public TmdbClient(IOptions<MovieLookupOptions> options)
     {
         var settings = options.Value;
         var url = settings.Url;
         var key = settings.Key;
+
+        _settings = settings;
 
         if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(key))
         {
@@ -30,16 +35,20 @@ public class TmdbClient : IMovieLookup
 
     public async Task<PersonList> GetCredits(int movieId)
     {
-        var response = await _client.GetAsync("movie/" + movieId + "/credits?language=en-US");
-
-        var body = await response.Content.ReadFromJsonAsync<CreditsResponse>();
+        var response = await _settings.Url
+            .WithOAuthBearerToken(_settings.Key)
+            .AppendPathSegment("movie")
+            .AppendPathSegment(movieId.ToString())
+            .AppendPathSegment("credits")
+            .SetQueryParam("language", "en-US")
+            .GetJsonAsync<CreditsResponse>();
 
         var result = new PersonList();
 
-        if (body is null)
+        if (response is null)
             return result;
 
-        foreach (var cast in body.Cast)
+        foreach (var cast in response.Cast)
         {
             var person = new Person
             {
@@ -51,7 +60,7 @@ public class TmdbClient : IMovieLookup
             result.Cast.Add(person);
         }
 
-        var director = body.Crew.FirstOrDefault(c => c.Job == "Director");
+        var director = response.Crew.FirstOrDefault(c => c.Job == "Director");
 
         if (director is not null)
         {
@@ -75,13 +84,14 @@ public class TmdbClient : IMovieLookup
             return new List<MovieModel>();
         }
 
-        string encodedMovieName = WebUtility.UrlEncode(movieName);
-
-        string apiPath = $"search/movie?query={encodedMovieName}&include_adult=false&language=da-DK&page=1";
-
-        var response = await _client.GetAsync(apiPath);
-
-        var result = await response.Content.ReadFromJsonAsync<MovieSearchResponse>();
+        var result = await _settings.Url
+            .WithOAuthBearerToken(_settings.Key)
+            .AppendPathSegment("search/movie")
+            .SetQueryParam("query", movieName)
+            .SetQueryParam("include_adult", "false")
+            .SetQueryParam("language", "en-US")
+            .SetQueryParam("page", "1")
+            .GetJsonAsync<MovieSearchResponse>();
 
         if (result is null)
             return new List<MovieModel>();
@@ -96,6 +106,7 @@ public class TmdbClient : IMovieLookup
                 Title = movie.Title,
                 Format = MovieFormat.Unknown,
                 Overview = movie.Overview,
+                Genre = movie.GenreIds.Select(p => GenreIdTranslator.ConvertToInternalGenre(p)).ToList(),
             };
 
             var credits = await GetCredits(movie.Id);
@@ -108,11 +119,6 @@ public class TmdbClient : IMovieLookup
 
         return movies;
     }
-}
-
-public interface IMovieLookup
-{
-    public Task<List<MovieModel>> GetMovieDetailsByMovieNameAsync(string movieName);
 }
 
 public class PersonList

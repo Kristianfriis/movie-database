@@ -1,4 +1,5 @@
 import { authHeaders } from './auth-helper.js'
+import { store } from './state.js'
 
 /**
  * @typedef {Object} Movie
@@ -7,6 +8,14 @@ import { authHeaders } from './auth-helper.js'
  * @property {string} format
  * @property {number} year
  */
+
+/**
+ * @typedef {Object} AddMovieResponse
+ * @property {Movie} movie
+ * @property {boolean} showAddDetailsMessage
+ * @property {boolean} redirectToMovieSelector
+ */
+
 
 /**
  * @typedef {Object} Collection
@@ -71,10 +80,10 @@ export const MovieService = {
       headers: {
         ...await authHeaders(),
       }
-    
+
     })
 
-    if(!response.ok){
+    if (!response.ok) {
       return null;
     }
 
@@ -179,7 +188,7 @@ export const MovieService = {
   * Add a movie to a collection.
   * @param {Movie} movie
   * @param {string} collectionId
-  * @returns {Promise<Movie>}
+  * @returns {Promise<AddMovieResponse>}
   */
   async add(movie, collectionId) {
 
@@ -202,26 +211,39 @@ export const MovieService = {
 
     var responseJson = await response.json();
 
-    var movieToReturn = {
-      id: responseJson.id,
-      title: movie.title,
-      format: movie.format,
-      year: movie.year
+    if (responseJson.movies.length === 1) {
+      var movieToReturn = {
+        id: responseJson.movies[0].id,
+        title: movie.title,
+        format: movie.format,
+        year: movie.year
+      }
+
+      // update in-memory cache for this collection
+      if (!this.moviesCache[collectionId]) {
+        this.moviesCache[collectionId] = [];
+      }
+      this.moviesCache[collectionId].push(movieToReturn);
+
+      // if currently viewing this collection, update this.movies so UI re-renders
+      if (this.currentCollectionId === collectionId) {
+        // assign a new array to ensure reactivity
+        this.movies = [...this.moviesCache[collectionId]];
+      }
+
+      var showAddDetailsMessage = true;
+      if(responseJson.needMoreInfo){
+        showAddDetailsMessage = false;
+      }
+      var redirectToMovieSelector = false;
+
+      return {movie: movieToReturn, showAddDetailsMessage, redirectToMovieSelector};
+    } else if (responseJson.movies.length > 1) {
+      store.movieSelectList = responseJson.movies;
+      return {movie: movieToReturn, showAddDetailsMessage: false, redirectToMovieSelector: true};
     }
 
-    // update in-memory cache for this collection
-    if (!this.moviesCache[collectionId]) {
-      this.moviesCache[collectionId] = [];
-    }
-    this.moviesCache[collectionId].push(movieToReturn);
-
-    // if currently viewing this collection, update this.movies so UI re-renders
-    if (this.currentCollectionId === collectionId) {
-      // assign a new array to ensure reactivity
-      this.movies = [...this.moviesCache[collectionId]];
-    }
-
-    return movieToReturn;
+    return null;
   },
 
   /**
