@@ -1,10 +1,12 @@
 using System;
+using System.Net;
 using Microsoft.Extensions.Options;
 using Movie.Database.Api.External.MovieLookup.Models;
+using Movie.Database.Api.Models;
 
 namespace Movie.Database.Api.External.MovieLookup;
 
-public class TmdbClient
+public class TmdbClient : IMovieLookup
 {
     private readonly HttpClient _client;
 
@@ -26,22 +28,95 @@ public class TmdbClient
         _client = client;
     }
 
-    public async Task GetMovieDetails()
-    {
-        var response = await _client.GetAsync("search/movie?query=de%20gr%C3%B8nne%20slagtere&include_adult=false&language=da-DK&page=1");
-
-        var body = await response.Content.ReadFromJsonAsync<MovieSearchResponse>();
-
-        Console.WriteLine(body?.Results.Count);
-        Console.WriteLine(body?.Results[0].Id);
-    }
-
-    public async Task GetCredits(int movieId)
+    public async Task<PersonList> GetCredits(int movieId)
     {
         var response = await _client.GetAsync("movie/" + movieId + "/credits?language=en-US");
 
         var body = await response.Content.ReadFromJsonAsync<CreditsResponse>();
 
-        Console.WriteLine(body?.Cast.Count);
+        var result = new PersonList();
+
+        if (body is null)
+            return result;
+
+        foreach (var cast in body.Cast)
+        {
+            var person = new Person
+            {
+                Id = cast.Id,
+                Name = cast.Name,
+                ExternalId = cast.Id,
+            };
+
+            result.Cast.Add(person);
+        }
+
+        var director = body.Crew.FirstOrDefault(c => c.Job == "Director");
+
+        if (director is not null)
+        {
+            var person = new Person
+            {
+                Id = director.Id,
+                Name = director.Name,
+                ExternalId = director.Id,
+            };
+
+            result.Directors.Add(person);
+        }
+
+        return result;
     }
+
+    public async Task<List<MovieModel>> GetMovieDetailsByMovieNameAsync(string movieName)
+    {
+        if (string.IsNullOrEmpty(movieName))
+        {
+            return new List<MovieModel>();
+        }
+
+        string encodedMovieName = WebUtility.UrlEncode(movieName);
+
+        string apiPath = $"search/movie?query={encodedMovieName}&include_adult=false&language=da-DK&page=1";
+
+        var response = await _client.GetAsync(apiPath);
+
+        var result = await response.Content.ReadFromJsonAsync<MovieSearchResponse>();
+
+        if (result is null)
+            return new List<MovieModel>();
+
+        var movies = new List<MovieModel>();
+
+        foreach (var movie in result.Results)
+        {
+            var movieModel = new MovieModel
+            {
+                Id = Guid.NewGuid(),
+                Title = movie.Title,
+                Format = MovieFormat.Unknown,
+                Overview = movie.Overview,
+            };
+
+            var credits = await GetCredits(movie.Id);
+
+            movieModel.Directors = credits.Directors;
+            movieModel.Cast = credits.Cast;
+
+            movies.Add(movieModel);
+        }
+
+        return movies;
+    }
+}
+
+public interface IMovieLookup
+{
+    public Task<List<MovieModel>> GetMovieDetailsByMovieNameAsync(string movieName);
+}
+
+public class PersonList
+{
+    public List<Person> Cast { get; set; } = new();
+    public List<Person> Directors { get; set; } = new();
 }
