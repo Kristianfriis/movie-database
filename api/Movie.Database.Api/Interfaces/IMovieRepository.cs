@@ -5,9 +5,10 @@ namespace Movie.Database.Api.Interfaces;
 
 public interface IMovieRepository
 {
-    Task<MovieModel?> GetByIdAsync(Guid id);
+    Task<MovieModel?> GetByIdAsync(Guid id, Guid? collectionId);
     Task<List<MovieModel>> GetByCollectionAsync(Guid collectionId);
     Task<Guid> AddToCollectionAsync(Guid collectionId, MovieModel movie);
+    Task<Guid> LinkMovieToCollection(Guid collectionId, MovieModel movie);
     Task RemoveFromCollectionAsync(Guid collectionId, Guid movieId);
     Task<List<AvailableCollection>> GetAvailableCollectionsAsync(Guid userId);
     Task<Guid> CreateCollectionAsync(string name, Guid ownerId);
@@ -16,5 +17,6 @@ public interface IMovieRepository
     Task<bool> RemoveMemberAsync(Guid collectionId, Guid userId);
     Task<bool> IsMaintainerAsync(Guid collectionId, Guid userId);
     Task<List<CollectionMember>> GetMembersForCollectionAsync(Guid collectionId);
-    Task<Guid> UpdateMovieAsync(MovieModel movie);
+    Task<Guid> UpdateMovieAsync(MovieModel movie, Guid? collectionId);
+    Task<List<MovieModel>> SearchMoviesAsync(string query);
 }

@@ -69,14 +69,14 @@ export const MovieService = {
   *  @param {string} name
   * @returns {Promise<Movie[]>}
   */
-  async GetMovieById(id) {
+  async GetMovieById(id, collectionId) {
     const foundMovie = this.newMovieCache.find(m => m.id == id);
     if (foundMovie) {
       // Create a working copy for editing
       return JSON.parse(JSON.stringify(foundMovie));
     }
 
-    var response = await fetch(window.appConfig.apiUrl + '/movies/' + id, {
+    var response = await fetch(window.appConfig.apiUrl + '/movies/' + id + '/' + collectionId, {
       headers: {
         ...await authHeaders(),
       }
@@ -487,8 +487,8 @@ export const MovieService = {
 
   },
 
-  async updateMovie(movie) {
-    const response = await fetch(window.appConfig.apiUrl + '/movies/' + movie.id, {
+  async updateMovie(movie, collectionId) {
+    const response = await fetch(window.appConfig.apiUrl + '/movies/' + movie.id + '/' + collectionId, {
       method: 'PUT',
       headers: {
         ...await authHeaders(),

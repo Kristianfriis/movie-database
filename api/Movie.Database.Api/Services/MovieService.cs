@@ -29,7 +29,14 @@ public class MovieService : IMovieService
             return (new List<MovieModel>(), false, "Movie title is required");
         }
 
-        var movies = await _lookup.GetMovieDetailsByMovieNameAsync(movie.Title);
+        var movies = await _repo.SearchMoviesAsync(movie.Title);
+        var foundInDb = movies.Any();
+
+        if (!movies.Any())
+        {
+            var moviesFromLookup = await _lookup.GetMovieDetailsByMovieNameAsync(movie.Title);
+            movies = moviesFromLookup;
+        }
 
         if (movies.Any())
         {
@@ -42,7 +49,16 @@ public class MovieService : IMovieService
                 try
                 {
                     var movieToReturn = movies.First();
+
+                    if (foundInDb)
+                    {
+                        movieToReturn.Format = movie.Format;
+                        var linkId = await _repo.LinkMovieToCollection(collectionId, movieToReturn);
+                        return (new List<MovieModel>() { movieToReturn }, false, null);
+                    }
+
                     movieToReturn.Format = movie.Format;
+                    movieToReturn.Title = movie.Title;
                     
                     var directors = await _personRepo.CreatePersons(movieToReturn.Directors);
                     var cast = await _personRepo.CreatePersons(movieToReturn.Cast);
@@ -53,10 +69,6 @@ public class MovieService : IMovieService
                     var id = await _repo.AddToCollectionAsync(collectionId, movieToReturn);
 
                     movieToReturn.Id = id;
-
-
-
-                    // await _repo.UpdateMovieAsync(movieToReturn);
 
                     return (new List<MovieModel>() { movieToReturn }, false, null);
                 }
@@ -81,11 +93,11 @@ public class MovieService : IMovieService
         }
     }
 
-    public async Task<(bool success, string? error, MovieModel? movie)> GetMovieAsync(Guid id)
+    public async Task<(bool success, string? error, MovieModel? movie)> GetMovieAsync(Guid id, Guid? collectionId = null)
     {
         (bool success, string? error, MovieModel? movie) result = (true, null, null);
 
-        var movie = await _repo.GetByIdAsync(id);
+        var movie = await _repo.GetByIdAsync(id, collectionId);
 
         if (movie is null)
         {
@@ -97,9 +109,9 @@ public class MovieService : IMovieService
         return result;
     }
 
-    public async Task<(bool success, string? error, Guid? id)> UpdateMovieAsync(MovieModel movie)
+    public async Task<(bool success, string? error, Guid? id)> UpdateMovieAsync(MovieModel movie, Guid? collectionId = null)
     {
-        var movieExist = await _repo.GetByIdAsync(movie.Id);
+        var movieExist = await _repo.GetByIdAsync(movie.Id, collectionId);
 
         if (movieExist is null)
         {
@@ -108,7 +120,7 @@ public class MovieService : IMovieService
 
         try
         {
-            var id = await _repo.UpdateMovieAsync(movie);
+            var id = await _repo.UpdateMovieAsync(movie, collectionId);
 
             return (true, null, id);
         }

@@ -122,7 +122,7 @@ export default {
   },
   methods: {
     navigateDetails(id) {
-      this.$router.push(`/details/${id}`);
+      this.$router.push(`/details/${id}/${this.collectionId}`);
     },
     async refreshMovies() {
       const loading = await loadingController.create({
@@ -183,7 +183,7 @@ export default {
       this.movie = { title: '', format: 'DVD' };
       this.query = '';
 
-      this.results.push(newMovie);
+      this.results.push(newMovieResponse.movie);
 
       var toastMessage = `${this.movie.title} added.`;
 

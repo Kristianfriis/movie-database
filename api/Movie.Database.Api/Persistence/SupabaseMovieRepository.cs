@@ -20,14 +20,27 @@ public class SupabaseMovieRepository : IMovieRepository
         _client = client;
     }
 
-    public async Task<MovieModel?> GetByIdAsync(Guid id)
+    public async Task<MovieModel?> GetByIdAsync(Guid id, Guid? collectionId = null)
     {
+        string? format = null;
+
+        if (collectionId is not null)
+        {
+            var movieCollectionLink = await _client
+                .From<CollectionMovieEntity>()
+                .Where(l => l.CollectionId == collectionId && l.MovieId == id)
+                .Single();
+
+            format = movieCollectionLink?.Format;
+        }
+
+
         var result = await _client
             .From<MovieEntity>()
             .Where(m => m.Id == id)
             .Single();
 
-        if (result is null) 
+        if (result is null)
             return null;
 
         var moviePersonsEntities = await _client
@@ -47,8 +60,9 @@ public class SupabaseMovieRepository : IMovieRepository
             .From<PersonEntity>()
             .Filter("id", Constants.Operator.In, cast.Select(m => m.PersonId).ToList())
             .Get();
-        
-        var movie = MapToDomain(result);
+
+        var movie = result.MapToDomain(format);
+
 
         movie.Directors.AddRange(directorsEntities.Models.Select(PersonMapper.MapToDomain).ToList());
         movie.Cast.AddRange(castEntities.Models.Select(PersonMapper.MapToDomain).ToList());
@@ -72,7 +86,20 @@ public class SupabaseMovieRepository : IMovieRepository
             .Filter("id", Constants.Operator.In, movieIds)
             .Get();
 
-        return movies.Models.Select(MapToDomain).ToList();
+        var result = new List<MovieModel>();
+
+        foreach (var movie in movies.Models)
+        {
+            var toPush = movie.MapToDomain();
+
+            var format = links.Models.FirstOrDefault(l => l.MovieId == movie.Id)?.Format;
+
+            toPush.Format = Enum.Parse<MovieFormat>(format ?? "unknown", true);
+
+            result.Add(toPush);
+        }
+
+        return result;
     }
 
     public async Task<Guid> AddToCollectionAsync(Guid collectionId, MovieModel movie)
@@ -81,7 +108,6 @@ public class SupabaseMovieRepository : IMovieRepository
         {
             Id = movie.Id,
             Title = movie.Title,
-            Format = movie.Format.ToString().ToLower(),
             Genres = JsonSerializer.Serialize(movie.Genre),
             PosterUrl = movie.PosterUrl,
             Overview = movie.Overview,
@@ -105,6 +131,7 @@ public class SupabaseMovieRepository : IMovieRepository
         {
             CollectionId = collectionId,
             MovieId = inserted.Model.Id,
+            Format = movie.Format.ToString().ToLower(),
         };
 
         await _client.From<CollectionMovieEntity>().Insert(link);
@@ -241,36 +268,6 @@ public class SupabaseMovieRepository : IMovieRepository
 
             return coll;
         }).ToList();
-    }
-
-
-
-    private MovieModel MapToDomain(MovieEntity db)
-    {
-        var movie = new MovieModel
-        {
-            Id = db.Id,
-            Title = db.Title,
-            CreatedAt = db.CreatedAt ?? default,
-            PosterUrl = db.PosterUrl,
-            Overview = db.Overview,
-        };
-
-        if (string.IsNullOrEmpty(db.Format))
-            movie.Format = MovieFormat.Unknown;
-        else
-        {
-            movie.Format = Enum.Parse<MovieFormat>(db.Format, true);
-        }
-
-        if (string.IsNullOrEmpty(db.Genres))
-            return movie;
-
-        var genres = JsonSerializer.Deserialize<List<Genre>>(db.Genres);
-
-        movie.Genre.AddRange(genres ?? new List<Genre>());
-
-        return movie;
     }
 
     public async Task<Guid> CreateCollectionAsync(string name, Guid ownerId)
@@ -416,7 +413,7 @@ public class SupabaseMovieRepository : IMovieRepository
         }).ToList();
     }
 
-    public async Task<Guid> UpdateMovieAsync(MovieModel movie)
+    public async Task<Guid> UpdateMovieAsync(MovieModel movie, Guid? collectionId = null)
     {
         var dbMovie = await _client
             .From<MovieEntity>()
@@ -429,7 +426,6 @@ public class SupabaseMovieRepository : IMovieRepository
         }
 
         dbMovie.Title = movie.Title;
-        dbMovie.Format = movie.Format.ToString().ToLower();
         dbMovie.Genres = JsonSerializer.Serialize(movie.Genre);
         dbMovie.PosterUrl = movie.PosterUrl;
         dbMovie.Overview = movie.Overview;
@@ -437,6 +433,22 @@ public class SupabaseMovieRepository : IMovieRepository
         await _client.From<MovieEntity>().Update(dbMovie);
         await UpdateMoviePersons(dbMovie.Id, movie.Directors, Director);
         await UpdateMoviePersons(dbMovie.Id, movie.Cast, Cast);
+
+        if (collectionId is not null)
+        {
+            var link = await _client
+                .From<CollectionMovieEntity>()
+                .Where(l => l.CollectionId == collectionId && l.MovieId == dbMovie.Id)
+                .Single();
+
+            if (link is not null)
+            {
+                link.Format = movie.Format.ToString().ToLower();
+
+                await _client.From<CollectionMovieEntity>().Update(link);
+            }
+
+        }
 
         return dbMovie.Id;
     }
@@ -488,5 +500,41 @@ public class SupabaseMovieRepository : IMovieRepository
                 .From<MoviePersonEntity>()
                 .Insert(newRelationships);
         }
+    }
+
+    public async Task<List<MovieModel>> SearchMoviesAsync(string query)
+    {
+        var dbResult = await _client
+        .From<MovieEntity>()
+        .Filter("title", Constants.Operator.ILike, $"%{query}%")
+        .Get();
+
+        var result = new List<MovieModel>();
+
+        foreach (var movie in dbResult.Models)
+        {
+            result.Add(movie.MapToDomain());
+        }
+
+        return result;
+    }
+
+    public async Task<Guid> LinkMovieToCollection(Guid collectionId, MovieModel movie)
+    {
+        var link = new CollectionMovieEntity
+        {
+            CollectionId = collectionId,
+            MovieId = movie.Id,
+            Format = movie.Format.ToString().ToLower(),
+        };
+
+        var result = await _client.From<CollectionMovieEntity>().Insert(link);
+
+        if (result.Model is null)
+        {
+            throw new Exception("Failed to link movie to collection");
+        }
+
+        return result.Model.Id;
     }
 }

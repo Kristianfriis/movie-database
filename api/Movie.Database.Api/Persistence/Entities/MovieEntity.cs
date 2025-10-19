@@ -15,9 +15,6 @@ public class MovieEntity : BaseModel
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
 
-    [Column("format")]
-    public string Format { get; set; } = default!;
-
     [Column("genres")]
     public string Genres { get; set; } = default!;
     

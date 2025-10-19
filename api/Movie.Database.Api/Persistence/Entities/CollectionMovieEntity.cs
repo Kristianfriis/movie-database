@@ -14,4 +14,7 @@ public class CollectionMovieEntity : BaseModel
 
     [Column("movie_id")]
     public Guid MovieId { get; set; }
+    
+    [Column("format")]
+    public string Format { get; set; } = default!;
 }

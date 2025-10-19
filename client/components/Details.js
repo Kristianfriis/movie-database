@@ -146,6 +146,7 @@ export default {
   `,
   data() {
     return {
+      collectionId: null,
       movie: {
         id: null,
         title: '',
@@ -170,8 +171,10 @@ export default {
     await loading.present();
 
     const id = this.$route.params.id;
+    const collectionId = this.$route.params.collectionId;
+    this.collectionId = collectionId;
 
-    var foundMovie = await MovieService.GetMovieById(id)
+    var foundMovie = await MovieService.GetMovieById(id, collectionId)
     if (foundMovie !== null) {
       this.movie = foundMovie;
     }
@@ -290,7 +293,7 @@ export default {
 
         loading.present();
 
-        var id = await MovieService.updateMovie(movieToUpdate);
+        var id = await MovieService.updateMovie(movieToUpdate, this.collectionId);
 
         loading.dismiss();
 

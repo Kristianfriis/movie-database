@@ -28,7 +28,7 @@ const collectionRoutes = [
   { path: '/search/:collectionId', component: Search },
   { path: '/search/:collectionId/:fromDetailsRoute', component: Search },
   { path: '/details/:id/:collectionId', component: Details },
-  { path: '/details/:id/', component: Details },
+  // { path: '/details/:id/', component: Details },
   { path: '/', component: AllCollectionsPage },
   { path: '/add-user-to-collection/:collectionId', component: AddUserToCollection },
   { path: '/settings/:collectionId', component: Settings },
