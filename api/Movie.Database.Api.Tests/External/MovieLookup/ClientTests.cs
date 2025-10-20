@@ -19,8 +19,7 @@ public class ClientTests
         var testSettings = new MovieLookupOptions
         {
             Url = "https://api.themoviedb.org/3/",
-            //Key = "test_api_key_123"
-            Key = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzMTEyOTQyODllNjEzYWYxYzRiNzc2ZTY4MWIzYjFmNyIsIm5iZiI6MTc2MDU0NjI1MS44MzksInN1YiI6IjY4ZWZjZGNiMmRiOTVjZGZmNzJiZWI2ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.kiw1JVdzbJLyxkgFNlRruBChkj_oW1d6OXU7zL-zg_Y"
+            Key = " < Key here >  "
         };
 
         var mockOptions = Substitute.For<IOptions<MovieLookupOptions>>();
@@ -40,8 +39,7 @@ public class ClientTests
         var testSettings = new MovieLookupOptions
         {
             Url = "https://api.themoviedb.org/3/",
-            //Key = "test_api_key_123"
-            Key = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzMTEyOTQyODllNjEzYWYxYzRiNzc2ZTY4MWIzYjFmNyIsIm5iZiI6MTc2MDU0NjI1MS44MzksInN1YiI6IjY4ZWZjZGNiMmRiOTVjZGZmNzJiZWI2ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.kiw1JVdzbJLyxkgFNlRruBChkj_oW1d6OXU7zL-zg_Y"
+            Key = " < Key here >  "
         };
 
         var mockOptions = Substitute.For<IOptions<MovieLookupOptions>>();

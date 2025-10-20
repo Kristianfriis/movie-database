@@ -1,5 +1,6 @@
 import { MovieService } from "../../services/movie-service.js";
 import { loadingController } from '@ionic/core';
+import { store } from "../../services/state.js";
 
 export default {
   template: /*html*/`
@@ -18,12 +19,12 @@ export default {
         </ion-toolbar>
       </ion-header>
       <ion-content> 
-      <ion-button expand="block" @click="openModal" v-if="collections.length === 0 && !loading">
+      <ion-button expand="block" @click="openModal" v-if="store.collections.length === 0 && !loading">
         Add New Collection
       </ion-button>
 
       <ion-list v-else>
-          <ion-item v-for="collection in collections" :key="collection.indexId" button @click="openCollection(collection.id)" detail="true">
+          <ion-item v-for="collection in store.collections" :key="collection.indexId" button @click="openCollection(collection.id)" detail="true">
           <ion-label>
             <h2>{{ collection.name }}</h2>
             <p>Role: {{ collection.role }}</p>
@@ -33,7 +34,7 @@ export default {
       </ion-list>
       </ion-content> 
 
-      <ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="collections.length !== 0">
+      <ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="store.collections.length !== 0">
       <ion-fab-button>
           <ion-icon name="chevron-up-circle"></ion-icon>
         </ion-fab-button>
@@ -68,21 +69,31 @@ export default {
   `,
   setup() { },
   data() {
-    return { collections: [], showModal: false, newCollectionName: '', loading: false }
+    return {
+      showModal: false,
+      newCollectionName: '',
+      loading: false,
+      store: store
+    }
   },
   async mounted() {
     this.loading = true;
-    const loading = await loadingController.create({
-      message: 'Loading collections...',
-    });
+    if (store.collections === null || store.collections === undefined || store.collections.length === 0) {
+      const loading = await loadingController.create({
+        message: 'Loading collections...',
+      });
 
-    loading.present();
+      loading.present();
 
-    this.collections = await MovieService.getAllCollections();
+      this.collections = await MovieService.getAllCollections();
+      store.collections = this.collections;
+      
+      loading.dismiss();
+    }
+
+    this.collections = store.collections;
 
     this.loading = false;
-
-    loading.dismiss();
   },
   methods: {
     openModal() {
@@ -102,7 +113,7 @@ export default {
 
       loading.present();
 
-      this.collections = await MovieService.getAllCollections(true);
+      this.store.collections = await MovieService.getAllCollections(true);
 
       this.loading = false;
 
@@ -131,14 +142,15 @@ export default {
       }
 
       var id = await MovieService.createCollection(this.newCollectionName);
-      this.collections.push({
-        indexId: this.collections.length,
+      var collectionToPush = {
+        indexId: this.store.collections.length,
         id: id,
         name: this.newCollectionName,
         ownerId: user.id,
         role: 'maintainer',
         members: [{ userId: user.id, name: user.name, role: 'maintainer' }]
-      })
+      }
+      this.store.collections.push(collectionToPush);
 
       this.newCollectionName = '';
       this.showModal = false;

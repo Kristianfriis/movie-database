@@ -18,5 +18,50 @@ export const store = reactive({
   formats: [
     'DVD', 'Bluray', 'Digital', 'Unknown'
   ],
-  movieSelectList: []
+  movieSelectList: [],
+  currentCollectionMovies: [],
+  collections: [],
+  collectionMovies: {},
+  getCollectionInfo(collectionId){
+    return this.collections.find(c => c.id === collectionId);
+  },
+  getIsMaintainer(collectionId){
+    var collectionInfo = this.getCollectionInfo(collectionId);
+    if(!collectionInfo){
+      return false;
+    }
+
+    return collectionInfo.role.toLowerCase() === 'maintainer';
+  },
+  collectionMovies: {},
+  getCollectionMovies(collectionId) {
+    return this.collectionMovies[collectionId];
+  },
+  setCollectionMovies(collectionId, movies) {
+    this.collectionMovies[collectionId] = movies;
+  },
+  setCurrentCollectionMovies(movies) {
+    this.currentCollectionMovies = movies;
+  },
+  addCollectionMovie(collectionId, movie) {
+    this.collectionMovies[collectionId].push(movie);
+  },
+  removeCollectionMovie(collectionId, movieId) {
+    this.collectionMovies[collectionId] = this.collectionMovies[collectionId].filter(m => m.id !== movieId);
+  },
+  searchCollectionMovies(collectionId, query) {
+    if(this.currentCollectionMovies.length === 0){
+      var collectionMovies = this.collectionMovies[collectionId];
+      if(!collectionMovies){
+        return [];
+      }
+
+      this.currentCollectionMovies = collectionMovies;
+    }
+
+    return this.currentCollectionMovies
+      .filter(m => (m.title || '')
+      .toLowerCase()
+      .includes(query.toLowerCase()));
+  }
 })

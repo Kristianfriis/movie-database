@@ -101,13 +101,6 @@ export const MovieService = {
       return [];
     }
 
-    // return cached copy unless forceRefresh
-    if (!forceRefresh && this.collections && this.collections.length) {
-      // return a shallow copy to avoid external mutation of cache
-      this.collections = [...this.collections];
-      return Promise.resolve(this.collections);
-    }
-
     const response = await fetch(window.appConfig.apiUrl + '/collections/' + userId, {
       headers: {
         ...await authHeaders(),
@@ -120,12 +113,7 @@ export const MovieService = {
 
     var collections = await response.json();
 
-    // store in cache and set current movies
-    this.collections = collections;
-    // assign a copy for reactivity
-    this.collections = [...collections];
-
-    return Promise.resolve(this.collections || []);
+    return Promise.resolve(collections || []);
   },
   /**
    * Create a collection for the current user.
@@ -232,15 +220,15 @@ export const MovieService = {
       }
 
       var showAddDetailsMessage = true;
-      if(responseJson.needMoreInfo){
+      if (responseJson.needMoreInfo) {
         showAddDetailsMessage = false;
       }
       var redirectToMovieSelector = false;
 
-      return {movie: movieToReturn, showAddDetailsMessage, redirectToMovieSelector};
+      return { movie: movieToReturn, showAddDetailsMessage, redirectToMovieSelector };
     } else if (responseJson.movies.length > 1) {
       store.movieSelectList = responseJson.movies;
-      return {movie: movieToReturn, showAddDetailsMessage: false, redirectToMovieSelector: true};
+      return { movie: movieToReturn, showAddDetailsMessage: false, redirectToMovieSelector: true };
     }
 
     return null;
@@ -409,17 +397,6 @@ export const MovieService = {
  */
   async getCollectionInfo(collectionId, forceRefresh = false) {
 
-    // return cached copy unless forceRefresh
-    if (!forceRefresh && this.collectionInfos && this.collectionInfos.length) {
-      // return a shallow copy to avoid external mutation of cache
-      var collectionToReturn = this.collectionInfos.find(c => c.id === collectionId);
-      if (collectionToReturn) {
-        return Promise.resolve(collectionToReturn);
-      }
-      return null;
-    }
-
-
     var response = await fetch(window.appConfig.apiUrl + '/collections/collectionInfo/' + collectionId, {
       headers: {
         ...await authHeaders(),
@@ -432,9 +409,7 @@ export const MovieService = {
 
     var result = await response.json()
 
-    result.isMaintainer = result.roleForCurrentUser.toLowerCase() === 'maintainer';
-
-    this.collectionInfos.push(result);
+    result.isMaintainer = result.roleForCurrentUser.toLowerCase() === 'maintainer';;
 
     return result;
   },

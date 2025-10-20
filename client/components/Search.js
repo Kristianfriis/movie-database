@@ -20,7 +20,7 @@ export default {
         </ion-toolbar>
       </ion-header>
 
-    <ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="collectionInfo.isMaintainer">
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end" v-if="store.getIsMaintainer(collectionId)">
    <ion-fab-button>
       <ion-icon name="chevron-up-circle"></ion-icon>
     </ion-fab-button>
@@ -92,28 +92,52 @@ export default {
     }
   },
   async created() {
-    var cachedCollection = MovieService.collectionInCache(this.collectionId);
-
-    let loading = null;
-    if (!cachedCollection) {
-      loading = await loadingController.create({
-        message: 'Getting movies...',
-      });
-
-      loading.present();
-    }
-
     const collectionId = this.$route.params.collectionId;
     if (collectionId) {
       this.collectionId = collectionId;
     }
 
-    this.collectionInfo = await MovieService.getCollectionInfo(collectionId);
-    this.results = await MovieService.getAllMovies(collectionId);
+    var loading = await loadingController.create({
+      message: 'Getting movies...',
+    });
 
+    if (store.collections === null || store.collections === undefined || store.collections.length === 0) {
+      loading.present();
+
+      store.collections = await MovieService.getAllCollections();
+
+      this.collectionInfo = store.getCollectionInfo(collectionId);
+
+      var cachedCollection = store.getCollectionMovies(collectionId);
+      if (!cachedCollection) {
+        var moviesFromAPi = await MovieService.getAllMovies(collectionId);
+        store.setCollectionMovies(collectionId, moviesFromAPi);
+
+        store.setCurrentCollectionMovies(moviesFromAPi);
+      }
+
+      this.results = store.currentCollectionMovies;
+
+      loading.dismiss();
+      return;
+    }
+
+    var cachedCollection = store.getCollectionMovies(collectionId);
     if (!cachedCollection) {
+      loading.present();
+      var moviesFromAPi = await MovieService.getAllMovies(collectionId);
+      store.setCollectionMovies(collectionId, moviesFromAPi);
+
+      store.setCurrentCollectionMovies(moviesFromAPi);
+
+      this.results = store.currentCollectionMovies;
       loading.dismiss();
     }
+
+    var storeMovies = store.getCollectionMovies(collectionId);
+    store.setCurrentCollectionMovies(storeMovies);
+
+    this.results = store.currentCollectionMovies;
   },
   mounted() {
     this.$refs.formatSelect.addEventListener('ionChange', (e) => {
@@ -147,8 +171,8 @@ export default {
     closeModal() {
       this.showModal = false;
     },
-    search() {
-      MovieService.search(this.query).then(m => this.results = m)
+    async search() {
+      this.results = store.searchCollectionMovies(this.collectionId, this.query);
     },
     navigateToAddUser() {
       this.$router.push(`/add-user-to-collection/${this.collectionId}`);
@@ -173,7 +197,7 @@ export default {
       loading.present();
 
       var newMovieResponse = await MovieService.add(this.movie, this.collectionId);
-      if(newMovieResponse.redirectToMovieSelector){
+      if (newMovieResponse.redirectToMovieSelector) {
         this.$router.push(`/movies-selector/${this.collectionId}`);
         return;
       }

@@ -11,7 +11,9 @@ export default {
           <ion-title>Choose correct movie</ion-title>
         </ion-toolbar>
       </ion-header>
-      <ion-content></ion-content>
+      <ion-content>
+        
+      </ion-content>
     </ion-page>
     `,
     setup() { },

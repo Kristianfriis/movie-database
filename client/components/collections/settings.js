@@ -16,6 +16,7 @@ export default {
               <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
             </ion-button>
           </ion-buttons>
+          <ion-progress-bar type="indeterminate" v-if="collectionInfo === null || collectionInfo === undefined"></ion-progress-bar>
         </ion-toolbar>
       </ion-header>
     <ion-content> 
@@ -109,6 +110,8 @@ export default {
       this.$router.back();
     },
     async refreshCollectionInfo() {
+      this.collectionInfo = null;
+
       const loading = await loadingController.create({
         message: 'getting users...',
       });

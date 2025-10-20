@@ -13,11 +13,6 @@ public static class PersonEndpoints
             .WithTags("People")
             .RequireAuthorization();
 
-        people.MapGet("/{id:guid}", async (Guid id) =>
-        {
-            return Results.Ok(new { id });
-        });
-
         people.MapGet("/search/{query}", async (string query, IPersonRepository repo) =>
         {
             var people = await repo.SearchPeopleAsync(query);
