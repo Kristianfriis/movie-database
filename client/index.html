@@ -18,66 +18,6 @@
   <link rel="icon" href="icons/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css" />
-  <style>
-    #app {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #ccc;
-      border-top-color: #42b983;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    html,
-    body {
-      /* Prevent scrolling on the document itself */
-      overflow: hidden;
-      /* Set base font size and line height */
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-      /* Crucial for full height */
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      /* Use viewport units as a fallback/alternative */
-      min-height: 100vh;
-    }
-
-    /* Ensure the mounting element (like #app) is also full height */
-    #app {
-      height: 100%;
-    }
-
-    #main-content {
-      /* Assuming you used id="main-content" */
-      height: 100%;
-    }
-
-    ion-page {
-      /* This is what Ionic's CSS should be doing */
-      height: 100%;
-    }
-
-    /* This is your workaround, but combined with the fullscreen attribute */
-    ion-content[fullscreen="true"] {
-      min-height: calc(var(100vh));
-      /* min-height: ; */
-      overflow: hidden; /* Hide scrollbars */
-      bottom: var(--min-height);
-    }
-  </style>
 </head>
 
 <body>
