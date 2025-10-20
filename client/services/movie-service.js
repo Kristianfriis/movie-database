@@ -414,6 +414,10 @@ export const MovieService = {
     return result;
   },
 
+  async removeMovieFromCollection(collectionId, movieId) {
+    alert("not implemented");
+  },
+
   async removeUserFromCollection(collectionId, userId) {
     var requestBody = {
       collectionId,

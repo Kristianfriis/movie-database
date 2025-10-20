@@ -37,13 +37,27 @@ export default {
     </ion-fab-list>
     </ion-fab>
  <ion-content>
-      <ion-list>
+      <ion-list ref="options">
         <ion-item>
           <ion-input v-model="query" @input="search" placeholder="Search..."></ion-input>
         </ion-item>
-        <ion-item v-for="movie in results" :key="movie.id" button detail="true" @click="navigateDetails(movie.id)">
-            {{ movie.title }} - {{ movie.format }}
-        </ion-item>
+        <ion-item-sliding v-for="movie in results" :key="movie.id">
+         <ion-item>
+            <ion-label>
+              <h2>{{ movie.title }}</h2>
+              <p>{{ movie.format }}</p>
+            </ion-label>
+          </ion-item>
+          
+         <ion-item-options side="end">
+            <ion-item-option>
+              <ion-icon slot="icon-only" name="information-circle" @click="navigateDetails(movie.id)"></ion-icon>
+            </ion-item-option>
+            <ion-item-option color="danger">
+              <ion-icon slot="icon-only" name="trash" @click="presentRemoveMovie(movie.id)"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
       </ion-list>
  </ion-content>
        <ion-modal :is-open="showModal" @didDismiss="closeModal">
@@ -77,6 +91,7 @@ export default {
               Create
             </ion-button>
       </ion-modal>
+      <ion-alert header="Are you sure?" ref="alert"></ion-alert>
 </ion-page>
   `,
   components: { IonSelect, IonSelectOption },
@@ -88,7 +103,8 @@ export default {
       movie: { title: '', year: '', format: 'DVD' },
       collectionId: null,
       showModal: false,
-      collectionInfo: { name: '', roleForCurrentUser: '', isMaintainer: false }
+      collectionInfo: { name: '', roleForCurrentUser: '', isMaintainer: false },
+      alert: null,
     }
   },
   async created() {
@@ -143,6 +159,7 @@ export default {
     this.$refs.formatSelect.addEventListener('ionChange', (e) => {
       this.movie.format = e.detail.value;
     });
+    this.alert = this.$refs.alert;
   },
   methods: {
     navigateDetails(id) {
@@ -225,6 +242,30 @@ export default {
       await toast.present();
 
       this.showModal = false;
+    },
+    async removeFilmFromCollection(movieId) {
+      this.$refs.options.closeSlidingItems();
+      await MovieService.removeMovieFromCollection(this.collectionId, movieId);
+    },
+    async presentRemoveMovie(movieId) {
+       this.alert.present();
+
+      this.alert.buttons = [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: async () => {
+            this.$refs.options.closeSlidingItems();
+          }
+        },
+        {
+          text: 'OK',
+          role: 'confirm',
+          handler: async () => {
+            await this.removeFilmFromCollection(movieId)
+          },
+        },
+      ];
     }
   },
   beforeRouteLeave(to, from, next) {
