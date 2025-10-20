@@ -415,7 +415,19 @@ export const MovieService = {
   },
 
   async removeMovieFromCollection(collectionId, movieId) {
-    alert("not implemented");
+    var response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/movies/' + movieId, {
+      method: 'DELETE',
+      headers: {
+        ...await authHeaders(),
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      return false;
+    }
+
+    return true;
   },
 
   async removeUserFromCollection(collectionId, userId) {

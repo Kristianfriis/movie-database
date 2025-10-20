@@ -41,13 +41,11 @@ export default {
         <ion-item>
           <ion-input v-model="query" @input="search" placeholder="Search..."></ion-input>
         </ion-item>
-        <ion-item-sliding v-for="movie in results" :key="movie.id">
-         <ion-item>
+        <ion-item v-for="movie in results" :key="movie.id" button detail="true" @click="openActionSheet(movie)">
             <ion-label>
               <h2>{{ movie.title }}</h2>
               <p>{{ movie.format }}</p>
             </ion-label>
-          </ion-item>
           
          <ion-item-options side="end">
             <ion-item-option>
@@ -57,7 +55,7 @@ export default {
               <ion-icon slot="icon-only" name="trash" @click="presentRemoveMovie(movie.id)"></ion-icon>
             </ion-item-option>
           </ion-item-options>
-        </ion-item-sliding>
+        </ion-item>
       </ion-list>
  </ion-content>
        <ion-modal :is-open="showModal" @didDismiss="closeModal">
@@ -92,6 +90,7 @@ export default {
             </ion-button>
       </ion-modal>
       <ion-alert header="Are you sure?" ref="alert"></ion-alert>
+      <ion-action-sheet trigger="open-action-sheet" header="Actions" ref="actionSheet"></ion-action-sheet>
 </ion-page>
   `,
   components: { IonSelect, IonSelectOption },
@@ -172,7 +171,12 @@ export default {
 
       loading.present();
 
-      this.results = await MovieService.getAllMovies(this.collectionId, true);
+      var moviesFromAPi = await MovieService.getAllMovies(collectionId);
+      store.setCollectionMovies(collectionId, moviesFromAPi);
+
+      store.setCurrentCollectionMovies(moviesFromAPi);
+
+      this.results = store.currentCollectionMovies;
 
       loading.dismiss()
     },
@@ -243,20 +247,78 @@ export default {
 
       this.showModal = false;
     },
+    async openActionSheet(movie) {
+      var actionSheet = this.$refs.actionSheet;
+
+      actionSheet.buttons = [
+        {
+          text: 'Info',
+          data: {
+            action: 'info',
+          },
+          handler: async () => {
+            await this.navigateDetails(movie.id);
+          }
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          data: {
+            action: 'delete',
+          },
+          handler: async () => {
+            await this.presentRemoveMovie(movie.id);
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          data: {
+            action: 'cancel',
+          }
+        },
+      ];
+
+      actionSheet.present();
+    },
     async removeFilmFromCollection(movieId) {
       this.$refs.options.closeSlidingItems();
-      await MovieService.removeMovieFromCollection(this.collectionId, movieId);
+      var success = await MovieService.removeMovieFromCollection(this.collectionId, movieId);
+
+      if (success) {
+        store.removeCollectionMovie(this.collectionId, movieId);
+        var cachedCollection = store.getCollectionMovies(this.collectionId);
+        store.setCurrentCollectionMovies(cachedCollection);
+        this.results = store.currentCollectionMovies;
+
+        const toast = await toastController.create({
+          message: 'Movie removed from collection.',
+          duration: 1500,
+          swipeGesture: "vertical",
+          color: "success"
+        });
+
+        await toast.present();
+        return;
+      }
+
+      const toast = await toastController.create({
+        message: 'Could not remove movie from collection.',
+        duration: 1500,
+        swipeGesture: "vertical",
+        color: "danger"
+      });
+
+      await toast.present();
+      return;
     },
     async presentRemoveMovie(movieId) {
-       this.alert.present();
+      this.alert.present();
 
       this.alert.buttons = [
         {
           text: 'Cancel',
-          role: 'cancel',
-          handler: async () => {
-            this.$refs.options.closeSlidingItems();
-          }
+          role: 'cancel'
         },
         {
           text: 'OK',

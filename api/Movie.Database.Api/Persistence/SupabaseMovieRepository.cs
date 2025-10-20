@@ -203,8 +203,7 @@ public class SupabaseMovieRepository : IMovieRepository
     {
         await _client
             .From<CollectionMovieEntity>()
-            .Filter("collection_id", Constants.Operator.Equals, collectionId)
-            .Filter("movie_id", Constants.Operator.Equals, movieId)
+            .Where(l => l.CollectionId == collectionId && l.MovieId == movieId)
             .Delete();
     }
 
