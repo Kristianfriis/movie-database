@@ -18,6 +18,11 @@ export const store = reactive({
   formats: [
     'DVD', 'Bluray', 'Digital', 'Unknown'
   ],
+  languages: [
+    { name: "Danish", code: "da-DK"},
+    { name: "English", code: "en-US"},
+  ],
+  currentLanguage: null,
   movieSelectList: [],
   currentCollectionMovies: [],
   collections: [],

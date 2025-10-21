@@ -4,6 +4,7 @@ import { menuController } from "@ionic/core"
 import { router } from './router.js'
 import { supabase } from './services/supabase.js'
 import { UserService } from './services/user-service.js'
+import { ProfileService } from './services/profile-service.js'
 
 import { store } from './services/state.js'
 
@@ -13,6 +14,9 @@ const App = {
             store,
             version : window.appConfig.version
         }
+    },
+    created() {
+      ProfileService.getLanguage();
     },
     methods: {
         back() {

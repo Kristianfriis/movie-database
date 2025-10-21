@@ -218,6 +218,18 @@ export default {
       loading.present();
 
       var newMovieResponse = await MovieService.add(this.movie, this.collectionId);
+      if (newMovieResponse === null) {
+        loading.dismiss();
+        const toast = await toastController.create({
+          message: 'Error adding movie.',
+          duration: 1500,
+          swipeGesture: "vertical",
+          color: "danger"
+        });
+
+        await toast.present();
+        return;
+      }
       if (newMovieResponse.redirectToMovieSelector) {
         this.$router.push(`/movies-selector/${this.collectionId}`);
         return;

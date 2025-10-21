@@ -2,9 +2,11 @@ import { UserService } from '../../services/user-service.js'
 import { User } from '../../services/dtos/user.js'
 import { ref } from 'vue';
 import { loadingController, toastController } from '@ionic/core';
+import { ProfileService } from '../../services/profile-service.js';
+import { store } from '../../services/state.js';
 
 export default {
-  name: 'Signup',
+  name: 'Profile',
   data() {
     return {
       email: '',
@@ -18,7 +20,14 @@ export default {
         avatarUrl: '',
         createdAt: null
       }),
-      createProfile: false
+      createProfile: false,
+      settings: {
+        language: {
+          name: '',
+          code: ''
+        },
+      },
+      store: store
     }
   },
   methods: {
@@ -61,6 +70,10 @@ export default {
 
       await toast.present();
     },
+    updateSettings() {
+      console.log(this.settings.language.code)
+      ProfileService.setLanguage(this.settings.language.code);
+    }
   },
   async created() {
     const loading = await loadingController.create({
@@ -83,6 +96,13 @@ export default {
         }
       });
     }
+
+    this.settings.language = ProfileService.getLanguage();
+
+    this.$refs.languageSelect.addEventListener('ionChange', (e) => {
+      var lang = this.store.languages.find(l => l.code === e.detail.value);
+      this.settings.language = lang;
+    });
 
     loading.dismiss();
   },
@@ -115,7 +135,28 @@ export default {
                 <ion-button expand="block" @click="updateProflile" v-else>Update</ion-button>
             </ion-card-content>
           </ion-card>
-          </ion-content> 
+          <ion-card v-if="!createProfile">
+            <ion-card-header>
+              <ion-card-title>Settings</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+            <ion-list>
+            <ion-item>
+                <ion-select 
+                  v-model="settings.language.code" 
+                  placeholder="App language" 
+                  ref="languageSelect">
+                <ion-select-option 
+                  v-for="lang in store.languages" 
+                  :key="lang.code" 
+                  :value="lang.code">{{ lang.name }}</ion-select-option>
+                </ion-select>
+                <ion-item>
+                </ion-list>
+                <ion-button expand="block" @click="updateSettings">Update settings</ion-button>
+            </ion-card-content>
+          </ion-card>
+      </ion-content> 
     </ion-page>
     `
 }
