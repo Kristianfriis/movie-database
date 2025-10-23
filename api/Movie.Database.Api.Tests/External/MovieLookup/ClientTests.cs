@@ -28,7 +28,7 @@ public class ClientTests
 
         var client = new TmdbClient(mockOptions);
 
-        var result = await client.GetMovieDetailsByMovieNameAsync("de grønne slagtere");
+        var result = await client.GetMovieDetailsByMovieNameAsync("de grønne slagtere", Models.Languages.Danish);
 
         Assert.Pass();
     }
