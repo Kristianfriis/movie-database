@@ -3,6 +3,7 @@ using System.Net;
 using Flurl;
 using Flurl.Http;
 using Microsoft.Extensions.Options;
+using Movie.Database.Api.Extentions;
 using Movie.Database.Api.External.MovieLookup.Models;
 using Movie.Database.Api.Interfaces;
 using Movie.Database.Api.Models;
@@ -77,7 +78,7 @@ public class TmdbClient : IMovieLookup
         return result;
     }
 
-    public async Task<List<MovieModel>> GetMovieDetailsByMovieNameAsync(string movieName)
+    public async Task<List<MovieModel>> GetMovieDetailsByMovieNameAsync(string movieName, Languages searchLanguage)
     {
         if (string.IsNullOrEmpty(movieName))
         {
@@ -89,7 +90,7 @@ public class TmdbClient : IMovieLookup
             .AppendPathSegment("search/movie")
             .SetQueryParam("query", movieName)
             .SetQueryParam("include_adult", "false")
-            .SetQueryParam("language", "en-US")
+            .SetQueryParam("language", searchLanguage.GetDescription() ?? "en-US")
             .SetQueryParam("page", "1")
             .GetJsonAsync<MovieSearchResponse>();
 

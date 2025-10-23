@@ -70,9 +70,18 @@ export default {
 
       await toast.present();
     },
-    updateSettings() {
+    async updateSettings() {
       console.log(this.settings.language.code)
       ProfileService.setLanguage(this.settings.language.code);
+
+      const toast = await toastController.create({
+        message: 'User settings updated.',
+        duration: 1500,
+        swipeGesture: "vertical",
+        color: "success"
+      });
+
+      await toast.present();
     }
   },
   async created() {
@@ -142,6 +151,8 @@ export default {
             <ion-card-content>
             <ion-list>
             <ion-item>
+            <ion-label position="stacked">Search language for the movie api</ion-label>
+            </ion-item>
                 <ion-select 
                   v-model="settings.language.code" 
                   placeholder="App language" 

@@ -59,15 +59,21 @@ public static class MovieEndpoints
             return Results.Ok(movies);
         }).Produces<List<MovieModel>>(); ;
 
-        collections.MapPost("/{collectionId:guid}/movies", async (Guid collectionId, CreateMovieRequest movie, IMovieService movieService) =>
+        collections.MapPost("/{collectionId:guid}/movies", async (Guid collectionId, [FromQuery(Name = "searchLanguage")] string searchLanguage, CreateMovieRequest movie, IMovieService movieService) =>
         {
+            var languageEnum = EnumHelper.GetEnumValueFromDescription<Languages>(searchLanguage);
+            if (languageEnum == null)
+            {
+                languageEnum = Languages.English;
+            }
+
             var movieModel = new MovieModel
             {
                 Title = movie.Title,
                 Format = (MovieFormat)movie.Format
             };
 
-            var result = await movieService.AddToCollectionAsync(collectionId, movieModel);
+            var result = await movieService.AddToCollectionAsync(collectionId, movieModel, languageEnum.Value);
 
             var response = new AddMovieResponse
             {
@@ -79,7 +85,7 @@ public static class MovieEndpoints
             {
                 response.Error = result.error;
                 response.Success = false;
-                
+
                 return Results.BadRequest(response);
             }
 

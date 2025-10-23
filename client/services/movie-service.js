@@ -184,7 +184,7 @@ export const MovieService = {
       return [];
     }
 
-    const response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/movies', {
+    const response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/movies?' + 'searchLanguage=' + store.currentLanguage.code, {
       method: 'POST',
       headers: {
         ...await authHeaders(),

@@ -4,5 +4,5 @@ namespace Movie.Database.Api.Interfaces;
 
 public interface IMovieLookup
 {
-    public Task<List<MovieModel>> GetMovieDetailsByMovieNameAsync(string movieName);
+    public Task<List<MovieModel>> GetMovieDetailsByMovieNameAsync(string movieName, Languages searchLanguage);
 }

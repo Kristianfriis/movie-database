@@ -17,7 +17,7 @@ public class MovieService : IMovieService
         _personRepo = personRepo;
     }
 
-    public async Task<(List<MovieModel> movies, bool needmoreinfo, string? error)> AddToCollectionAsync(Guid collectionId, MovieModel movie)
+    public async Task<(List<MovieModel> movies, bool needmoreinfo, string? error)> AddToCollectionAsync(Guid collectionId, MovieModel movie, Languages searchLanguage)
     {
         // get movie details from movie lookup if any
         // if more than 1 entry, return them all, user needs to choose the correct
@@ -34,7 +34,7 @@ public class MovieService : IMovieService
 
         if (!movies.Any())
         {
-            var moviesFromLookup = await _lookup.GetMovieDetailsByMovieNameAsync(movie.Title);
+            var moviesFromLookup = await _lookup.GetMovieDetailsByMovieNameAsync(movie.Title, searchLanguage);
             movies = moviesFromLookup;
         }
 
