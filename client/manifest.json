@@ -2,17 +2,57 @@
   "name": "My Movie Library",
   "short_name": "MovieLibrary",
   "start_url": "/movie-database/#/",
-"scope":"/movie-database/",
+  "scope": "/movie-database/",
   "display": "standalone",
   "background_color": "#121212",
-  "display_override": [ "window-controls-overlay", "standalone", "fullscreen" ],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "fullscreen"
+  ],
   "id": "/",
   "theme_color": "#317EFB",
-       "icons": [
-        { "src": "icons/favicon.ico", "type": "image/x-icon", "sizes": "32x32" },
-        { "src": "icons/icon-192.png", "type": "image/png", "sizes": "192x192" },
-        { "src": "icons/icon-512.png", "type": "image/png", "sizes": "512x512" },
-        { "src": "icons/icon-192-maskable.png", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
-        { "src": "icons/icon-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
-      ]
+  "icons": [
+    {
+      "src": "icons/favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "32x32"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "icons/icon-192-maskable.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icons/screenshots/1.jpg",
+      "sizes": "750x1334",
+      "form_factor": "narrow",
+      "label": "Mobile view showing collections add"
+    },
+       {
+      "src": "icons/screenshots/2.jpg",
+      "sizes": "750x1334",
+      "form_factor": "narrow",
+      "label": "Mobile view showing collections"
+    }
+  ]
 }
