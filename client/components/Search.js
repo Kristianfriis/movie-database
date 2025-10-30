@@ -263,7 +263,7 @@ export default {
       var actionSheet = this.$refs.actionSheet;
 
       actionSheet.buttons = [
-        {
+         {
           text: 'Info',
           data: {
             action: 'info',
@@ -271,8 +271,11 @@ export default {
           handler: async () => {
             await this.navigateDetails(movie.id);
           }
-        },
-        {
+        }
+      ]
+
+      if(store.getIsMaintainer(this.collectionId)) {
+        actionSheet.buttons.push( {
           text: 'Delete',
           role: 'destructive',
           data: {
@@ -281,15 +284,16 @@ export default {
           handler: async () => {
             await this.presentRemoveMovie(movie.id);
           }
-        },
-        {
+        })
+      }
+
+      actionSheet.buttons.push(  {
           text: 'Cancel',
           role: 'cancel',
           data: {
             action: 'cancel',
           }
-        },
-      ];
+        })
 
       actionSheet.present();
     },
