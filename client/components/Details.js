@@ -274,6 +274,15 @@ export default {
       }
     },
     async updateMovie() {
+      if (!this.store.getIsMaintainer(this.collectionId)) {
+        const toast = await toastController.create({
+          message: `You may not update this movie.`,
+          duration: 2000,
+          color: "warning"
+        })
+        await toast.present();
+        return;
+      }
       try {
         // Prepare the data to be sent for update
         const movieToUpdate = {

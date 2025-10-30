@@ -510,7 +510,24 @@ export const MovieService = {
     return user.id;
   },
 
-  async saveFullMovieAsync(movie, collectionId){
-    alert("saveFullMovieAsync not implemented")
+  async saveFullMovieAsync(movie, collectionId) {
+    var response = await fetch(window.appConfig.apiUrl + '/collections/' + collectionId + '/addMovieWithDetails', {
+      method: 'POST',
+      headers: {
+        ...await authHeaders(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(movie)
+    })
+
+    if (!response.ok) {
+      return null;
+    }
+
+    var responseJson = await response.json();
+
+    movie.id = responseJson;
+
+    return responseJson;
   }
 }

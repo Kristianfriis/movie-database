@@ -24,6 +24,7 @@ export const store = reactive({
   ],
   currentLanguage: null,
   movieSelectList: [],
+  movieSelectFormat: null,
   currentCollectionMovies: [],
   collections: [],
   collectionMovies: {},

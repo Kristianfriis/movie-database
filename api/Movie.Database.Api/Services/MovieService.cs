@@ -17,13 +17,41 @@ public class MovieService : IMovieService
         _personRepo = personRepo;
     }
 
+    public async Task<(bool success, string? error, Guid? id)> AddFullMovieDetailsAsync(Guid collectionId, MovieModel movie)
+    {
+        var movies = await _repo.SearchMoviesAsync(movie.Title!);
+        var foundInDb = movies.Any();
+
+        if (foundInDb)
+        {
+            var movieToReturn = movies.First();
+            movieToReturn.Format = movie.Format;
+            var linkId = await _repo.LinkMovieToCollection(collectionId, movieToReturn);
+
+            return (true, null, movieToReturn.Id);
+        }
+        try
+        {
+            var directors = await _personRepo.CreatePersons(movie.Directors);
+            var cast = await _personRepo.CreatePersons(movie.Cast);
+
+            movie.Directors = directors;
+            movie.Cast = cast;
+
+            var id = await _repo.AddToCollectionAsync(collectionId, movie);
+
+            return (true, null, id);
+        }
+        catch (System.Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return (false, "Failed to add movie to collection", null);
+        }
+
+    }
+
     public async Task<(List<MovieModel> movies, bool needmoreinfo, string? error)> AddToCollectionAsync(Guid collectionId, MovieModel movie, Languages searchLanguage)
     {
-        // get movie details from movie lookup if any
-        // if more than 1 entry, return them all, user needs to choose the correct
-        // if only 1, add the movie to database, and return the list with 1 entry
-        // if none, add the details available, and set the needmoreinfo flag. 
-
         if (string.IsNullOrEmpty(movie.Title))
         {
             return (new List<MovieModel>(), false, "Movie title is required");
@@ -59,7 +87,7 @@ public class MovieService : IMovieService
 
                     movieToReturn.Format = movie.Format;
                     movieToReturn.Title = movie.Title;
-                    
+
                     var directors = await _personRepo.CreatePersons(movieToReturn.Directors);
                     var cast = await _personRepo.CreatePersons(movieToReturn.Cast);
 

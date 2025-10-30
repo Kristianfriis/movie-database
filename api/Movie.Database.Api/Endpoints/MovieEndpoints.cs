@@ -45,6 +45,15 @@ public static class MovieEndpoints
 
         }).Produces<Guid>(StatusCodes.Status200OK);
 
+        movies.MapGet("/search", async (string query, IMovieRepository repo) =>
+        {
+            var movies = await repo.SearchMoviesAsync(query);
+
+            return Results.Ok(movies);
+        }).Produces<List<MovieModel>>();
+
+        
+
         collections.MapGet("/{userId:guid}", async (Guid userId, [FromServices] IMovieRepository repo) =>
         {
             var collections = await repo.GetAvailableCollectionsAsync(userId);
@@ -215,5 +224,15 @@ public static class MovieEndpoints
             return Results.Ok(response);
 
         }).Produces<DefaultResponse>();
+
+        collections.MapPost("/{collectionId:guid}/addMovieWithDetails", async (Guid collectionId, [FromBody] MovieModel movie, IMovieService movieService) =>
+        {
+            var (success, error, id) = await movieService.AddFullMovieDetailsAsync(collectionId, movie);
+
+            if(!success)
+                return Results.BadRequest(error);
+
+            return Results.Created($"", id);
+        }).Produces<AddMovieResponse>(StatusCodes.Status201Created);
     }
 }

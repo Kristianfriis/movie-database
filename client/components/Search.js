@@ -234,6 +234,7 @@ export default {
       if (newMovieResponse.redirectToMovieSelector) {
         loading.dismiss();
         this.showModal = false;
+        this.store.movieSelectFormat = this.movie.format;
         this.$router.push(`/movies-selector/${this.collectionId}`);
         return;
       }

@@ -106,7 +106,6 @@ public class SupabaseMovieRepository : IMovieRepository
     {
         var dbMovie = new MovieEntity
         {
-            Id = movie.Id,
             Title = movie.Title,
             Genres = JsonSerializer.Serialize(movie.Genre),
             PosterUrl = movie.PosterUrl,

@@ -63,13 +63,47 @@ export default {
         return;
       }
 
+      const loading = await loadingController.create({
+        message: `Adding movie...`,
+      });
+
+      loading.present();
+
       var movie = this.store.movieSelectList.find(m => m.id === this.selectedMovieId);
+      movie.format = this.store.movieSelectFormat;
 
       if (!movie) {
         return;
       }
 
-      await MovieService.saveFullMovieAsync(movie, this.collectionId);
+      var response = await MovieService.saveFullMovieAsync(movie, this.collectionId);
+
+      loading.dismiss();
+
+      if (response === null) {
+        const toast = await toastController.create({
+          message: 'Error adding movie.',
+          duration: 1500,
+          swipeGesture: "vertical",
+          color: "danger"
+        });
+
+        await toast.present();
+        return;
+      }
+
+      this.store.addCollectionMovie(this.collectionId, response)
+
+      const toast = await toastController.create({
+        message: 'Movie added successfully',
+        duration: 1500,
+        swipeGesture: "vertical",
+        color: "success"
+      });
+
+      await toast.present();
+
+      this.$router.back();
     }
   }
 }
