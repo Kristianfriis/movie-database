@@ -171,8 +171,8 @@ export default {
 
       loading.present();
 
-      var moviesFromAPi = await MovieService.getAllMovies(collectionId);
-      store.setCollectionMovies(collectionId, moviesFromAPi);
+      var moviesFromAPi = await MovieService.getAllMovies(this.collectionId);
+      store.setCollectionMovies(this.collectionId, moviesFromAPi);
 
       store.setCurrentCollectionMovies(moviesFromAPi);
 
