@@ -4,6 +4,7 @@ import { loadingController, toastController } from '@ionic/core';
 import { IonSelect, IonSelectOption } from '@ionic/ionicvue';
 
 export default {
+  name: 'Movies',
   template: /*html*/`
   <ion-page>
  <ion-header>
@@ -231,6 +232,8 @@ export default {
         return;
       }
       if (newMovieResponse.redirectToMovieSelector) {
+        loading.dismiss();
+        this.showModal = false;
         this.$router.push(`/movies-selector/${this.collectionId}`);
         return;
       }

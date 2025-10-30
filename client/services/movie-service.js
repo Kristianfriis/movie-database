@@ -508,5 +508,9 @@ export const MovieService = {
     }
 
     return user.id;
+  },
+
+  async saveFullMovieAsync(movie, collectionId){
+    alert("saveFullMovieAsync not implemented")
   }
 }

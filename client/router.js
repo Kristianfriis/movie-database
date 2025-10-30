@@ -11,6 +11,7 @@ import Profile from './components/auth/Profile.js'
 import AllCollectionsPage from './components/collections/AllCollectionsPage.js';
 import AddUserToCollection from './components/collections/AddUserToCollection.js';
 import Settings from './components/collections/settings.js';
+import moviesSelector from './components/collections/moviesSelector.js';
 
 const authRoutes = [
   { path: '/login', component: Login },
@@ -32,6 +33,7 @@ const collectionRoutes = [
   { path: '/', component: AllCollectionsPage },
   { path: '/add-user-to-collection/:collectionId', component: AddUserToCollection },
   { path: '/settings/:collectionId', component: Settings },
+  { path: '/movies-selector/:collectionId', component: moviesSelector },
 ]
 
 const utilityRoutes = [
